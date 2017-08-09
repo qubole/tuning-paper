@@ -1,0 +1,81 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{listings}
+\usepackage{booktabs} % For formal tables
+
+
+% Copyright
+%\setcopyright{none}
+%\setcopyright{acmcopyright}
+%\setcopyright{acmlicensed}
+\setcopyright{rightsretained}
+%\setcopyright{usgov}
+%\setcopyright{usgovmixed}
+%\setcopyright{cagov}
+%\setcopyright{cagovmixed}
+
+
+% DOI
+\acmDOI{10.475/123_4}
+
+% ISBN
+\acmISBN{123-4567-24-567/08/06}
+
+%Conference
+\acmConference[WOODSTOCK'97]{ACM Woodstock conference}{July 1997}{El
+  Paso, Texas USA} 
+\acmYear{1997}
+\copyrightyear{2016}
+
+\acmPrice{15.00}
+
+
+\begin{document}
+\title{Optimizing SQL Workloads for Big Data}
+
+\author{Prasad Deshpande}
+\affiliation{%
+  \institution{Qubole India}
+  \city{Bengaluru}
+  \state{Karnataka}
+  \country{India}
+}
+\email{pmd@qubole.com}
+
+\author{Amogh Margoor}
+\affiliation{%
+  \institution{Qubole India}
+  \city{Bengaluru}
+  \state{Karnataka}
+  \country{India}
+}
+\email{amoghm@qubole.com}
+
+\author{Rajat Venkatesh}
+\affiliation{%
+  \institution{Qubole India}
+  \city{Bengaluru}
+  \state{Karnataka}
+  \country{India}
+}
+\email{rvenkatesh@qubole.com}
+
+% The default list of authors is too long for headers}
+\renewcommand{\shortauthors}{P. Deshpande et al.}
+
+
+\begin{abstract}
+Data explosion has pushed various organisation and enterprises towards large scale Big Data adoption. Due to popularity of SQL as a data language to query, manipulate and visualize data there are lot technologies that offer SQL-on-Big Data like Apache Hive, SparkSQL, Presto. These SQL-on-Big Data technologies have seen wide adoption. However, auto tuning them for performance or cost is still a big challenge and is mostly done manually by experts around. In this paper, we would evaluate and propose novel methods to optimize SQL workloads on Big Data. These query engines offer plethora of configurations to tune. General approach is to use rule of thumb to arrive at this, but that may be far from optimal configuration for the job. Our method would come up with mathematical model for Engines that can be used to arrive at optimal configuration. Our method would also suggest instance type of the cluster that would suite a particular workload. As our approach focuses on SQL workloads instead of generic Big Data Workload it has helped in greatly simplifying the model.
+\end{abstract}
+
+\keywords{Big Data, SQL, Hadoop performance tuning \LaTeX, text tagging}
+
+
+\maketitle
+
+\input{samplebody-conf}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{sample-bibliography} 
+
+\end{document}
