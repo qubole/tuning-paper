@@ -51,3 +51,14 @@ The overall algorithm is listed in Figure~\ref{alg:iterativesearch} and is fairl
     \end{algorithmic}
 \end{algorithm}
   
+\subsection{Results}
+We evaluated the effectiveness and practicality of the iterative method by running experiments on both synthetic and real workloads. The experiments were carried out for a HIVE on MR engine. The results demonstrated the importance of optimizing the configuration parameters, but at the same time motivated us to explore the model based method instead of the iterative method. We thus present the results here before moving on describing the model based approach.
+
+\subsubsection*{Synthetic Workload}
+For synthetic workload, we used the TPC DS dataset (scale 1000) and queries. Each query had to be run a number of times to discover a good set of configuration parameters. To keep the time for the experiments reasonable, we had to use a somewhat small dataset. The average data read by each query was of the order of 20 to 40 GB. The experiments were run on a 4 node cluster on AWS with machine type r3.xlarge. The metric to be optimized was the total resource utilization as (Formula~\ref{}) and parameters whose values are to be determined are the ones mentioned earlier in Table~\ref{}. For each query, we compare the best and worst configuration discovered with the default one in terms of the resource utilization. The results are shown in Figure~\ref{fig:iterativetpcds}. It plots the ratios of the resource usage of minimum to default, maximum to default and maximum to minimum. The min corresponds to the best configuration discovered and max corresponds to the worst configuration among the ones tried out. The graph shows that the min to default ratio varies from 0.18 to 0.73, which indicates that the iterative search leads to a configuration that can save upto 82\% in resource usage over the default configuration. The ratio of max to default is mostly close to 1 and in some cases goes upto 1.80. This indicates that in many cases, the default configuration itself was the worst one (same as max). This is due to the fact that the default split size was 128 MB, leading to a large number of mappers, each processing small amount of data. Since there is some overhead (5-10s) in starting the JVM for each mapper, the startup time becomes significant percentage of the total mapper time if the mapper itself takes very less time to process the data. As a result, the overall query time suffers and resource utilization increases. This suggests that a different default with a larger split size would be more appropriate. Finally, the ratio of max to the min varies from 1.47 to 5.41, indicating that the configuration parameters do make a significant difference in query execution. 
+\begin{figure}[h]
+	\includegraphics[width=\linewidth]{fig/tpcds-iterative.png}
+	%\vspace*{-15pt}
+	\caption{Iterative algorithm on TPC DS}
+	\label{fig:iterativetpcds}
+\end{figure}
