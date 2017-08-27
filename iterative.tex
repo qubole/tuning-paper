@@ -62,3 +62,20 @@ For synthetic workload, we used the TPC DS dataset (scale 1000) and queries. Eac
 	\caption{Iterative algorithm on TPC DS}
 	\label{fig:iterativetpcds}
 \end{figure}
+
+\subsubsection*{Real Workloads}
+We evaluated the iterative method over real customer data and queries. The workload consisted of three Hive queries running on Hadoop2 MR. These queries were very large and complex and part of their analytics workflow. The input data size was about 400 GB for two of the queries and 200 GB for the third query. The cluster consisted of a r3.2xlarge master node and 30 slave nodes of type r3.8xlarge on AWS Cloud. Figure~\ref{fig:iterativelyft} shows the percentage savings in the cost of the three queries with the configuration discovered by the iterative algorithm, compared to the cost with the configuration that the customer was using in production. The results show that the iterative algorithm was able to achieve significant savings upto 77\% even for production workloads, indicating that many production workloads are not fully optimized. However, the iterative algorithm took over 50 hours and cost \$5000 since the cluster was quite large with powerful machines. 
+\begin{figure}[h]
+	\includegraphics[width=\linewidth]{fig/lyft.png}
+	%\vspace*{-15pt}
+	\caption{Iterative algorithm on real workload}
+	\label{fig:iterativelyft}
+\end{figure}
+
+\subsubsection*{Discussion}
+The results on synthetic and real datasets show that finding good configuration parameters can lead to significant savings in query costs. The iterative algorithm is able to discover good configuration parameters in a small number of iterations (usually around 10-15 iterations). However, there are some practical limitations as listed below:
+\begin{itemize}
+	\item The dollar cost of the optimization process can be significant as seen in the real workload. In this case, the customer had 1000 more queries. It may be possible to make the search more efficient and reduce the number of iterations. Since  customers have 100s or 1000s of queries, even 10 or 50 fold reduction is not sufficient to make the approach economical.
+	\item For ETL queries, the approach requires shadow clusters and queries. The queries had to be reviewed multiple times to make sure production clusters and tables were not affected. The cost in terms of man-hours is also exorbitant. 	
+\end{itemize} 
+To address these concerns, we propose a cost model based optimization approach next that does not require multiple executions of the query with different parameters.
