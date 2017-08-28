@@ -1,0 +1,41 @@
+\section{Related Work}
+There are earlier works which have tried to optimize Hadoop workloads. These can broadly be classified into two categories:
+\begin{description}
+\item Mathematical Model Based
+\item Actual Execution Based
+\end{description}
+
+\subsection{Mathematical Model Based}
+Starfish was one of the first to model hadoop performance. In Starfish,
+a component named \textit{What-if} engine estimated the cost of Hadoop Job using Simulation and
+Hadoop Cost Model. The Cost-based optimizer (CBO) uses the what-if engine and recursive random search (RSS)
+for tuning the parameters for a new Hadoop job. There were other works like Wu et al \cite{wu2013self} that followed Starfish. These methods collect information about the jobs executed on hadoop, a process
+known as profiling. Job “signatures”, i.e., the resource utilization patterns of the jobs are used for profiling. In
+the offline phase, using a training set, the jobs are clustered
+(using variants of k-means) according to their respective signatures.
+In the online phase [21] trains a SVM which makes
+accurate and fast prediction of a job’s performance for various
+configuration parameters and input data sizes. For any
+new job, its signature is matched with the profiles of one
+of the clusters, after which that cluster’s optimal parameter
+configuration is used. In \cite{wu2013self} , the optimal parameter con-
+figuration for every cluster is obtained through simulated
+annealing, albeit for a reduced parameter search space.
+An online MapReduce performance tuner (MROnline) is
+developed in [22]. It is desgined and implemented on YARN
+[30]. MROnline consists of a centralized master component which is the online tuner. It is
+a daemon process that runs on the same machine as the
+resource manager of YARN or on a dedicated machine. Online
+tuner controls slave components that run within the
+node managers on the slave nodes of the YARN cluster. It
+consists of three components: a monitor, a tuner and a dynamic
+configurator. The monitor works together with the
+per-node slave monitors to periodically monitor application
+statistics. These statistics are sent to the centralized monitor.
+The centralized monitor then aggregates, analyzes and
+passes the information to the tuner. The tuner implements
+hill climbing algorithm to tune parameter values. The tuned
+parameter values are distributed to the slave configurators
+by the dynamic configurator. The slave configurators activate
+the new parameter values for the tasks that are running
+on their associated nodes.
