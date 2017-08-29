@@ -1,6 +1,6 @@
 \section{Model Based Approach}
 
-We saw in section \ref{section:iter} that the approach is not scalable as it is expensive to run the jobs multiple times. In this section, we will propose an alternative approach of using mathematical models to recommend new settings. In earlier part of section we would present key insights that lead us to develop simple models for Big Data SQL Engines. In latter part we would discuss a model for Hive on Hadoop Map Reduce which can be used to recommend optimal settings. We would also present detailed experimental evaluation of our model.
+We saw in section \ref{section:iter} that the iterative approach is not scalable as it is expensive to run jobs multiple times for optimizing. In this section, we will propose an alternative approach of using mathematical models to recommend new settings. In earlier part of section we would present key insights that lead us to develop simple models for Big Data SQL Engines. In latter part we would discuss a model for HIVE on MR Engine which can be used to recommend optimal settings. We would also present detailed experimental evaluation of our model.
 
 \subsection{Key Insights}
 
@@ -9,9 +9,9 @@ We have run multiple experiments to optimize real world SQL workloads of our cus
 \noindent\subsubsection*{\bf Container shape should match that of Instance shape}
 Yarn allocates containers on two dimensions - \textbf{memory} and \textbf{vcpu}. Each container is given 1 vcpu and some memory. The memory/vcpu of the containers should match the memory/vcpu ratio of the machine type. Otherwise resources are wasted. Figure \ref{fig:container_shape} illustrates three scenarios:
 \begin{enumerate}[label=(\alph*)]
-\item Memory/vCPU ratio of container is same as that of instance; hence, neither memory nor CPU is wasted. 
-\item Memory/vCPU ratio of container is smaller than that of instance; hence, memory is wasted as extra memory of instance is still remaining unused after container allocation.
-\item Memory/vCPU ratio of container is higher than that of instance; hence, CPU is wasted as extra CPU of instance is remaining unused after container allocation.
+\item[$\bullet$] Memory/vCPU ratio of container is same as that of instance; hence, neither memory nor CPU is wasted. 
+\item[$\bullet$] Memory/vCPU ratio of container is smaller than that of instance; hence, memory is wasted as extra memory of instance is still remaining unused after container allocation.
+\item[$\bullet$] Memory/vCPU ratio of container is higher than that of instance; hence, CPU is wasted as extra CPU of instance is remaining unused after container allocation.
 \end{enumerate}
 
 \begin{figure*}[h]
@@ -39,75 +39,89 @@ This insight is specific to Spark, where there is an additional parameter of cor
 
 \subsection{Model}
 
-In this part of section, we will propose a model for Hive on Hadoop Map Reduce Job. We would propose a novel algorithm to optimize Hive Job both for time and cost. Firstly, we would propose algorithm to optimize cumulative time for Hive Job on a particular instance i.e., optimize metric $\mathcal{T} = \sum_{i=1}^{n} t_i$ where $n$ is number of containers and $t_i$ is execution time for $i^{th}$ container. Secondly, we would propose a straightforward algorithm to optimize cost which would use the first algorithm. 
-
+In this part of section, we will propose a model for Hive on Hadoop Map Reduce Job. We would propose a novel algorithm to optimize Hive Job for a couple of cost metrics. Firstly, we will propose algorithm to optimize cumulative time for Hive Job on a particular instance i.e., optimize metric $\mathcal{T} = \sum_{i=1}^{n} t_i$ where $n$ is number of containers and $t_i$ is execution time for $i^{th}$ container. Secondly, we would propose a straightforward algorithm to optimize cost which would use the first algorithm. In earlier work \cite{VanKen} on auto tuning Databases like MySQL and PostGres it is found that tuning only few knobs can improve performance significantly. We used this finding to choose few parameters that will impact performance significantly.
 Following are the parameters of the model which would be used in the first algorithm:
+\begin{enumerate}
+    \item[$\bullet$] Job Parameters: There are the input parameters of the job that needs to be specified. Table \ref{table:job_params} defines these job parameters.
+    \item[$\bullet$] Instance configuration: Table \ref{table:inst_conf} defines the machine configuration.
+    \item[$\bullet$] Global Parameters: These are some of the global parameters that can be used to tune the algorithm. These are defined in Table \ref{table:global_params}.
+\end{enumerate}
 
-\subsubsection{\bf Job Parameters:} \label{subsubsec:job_param}
-These are the input job parameters for the model:
-\begin{description}
-\item \textit{mapperTime} 
-\item \textit{numOfMapper}
-\item \textit{mapperMemory}
-\item \textit{splitSize}
-\item \textit{mapperOutputBytes}
-\item \textit{mapperOutputRecords}
-\item \textit{reducerTime}
-\item \textit{numOfReducer}
-\item \textit{bytesPerReducer}
-\item \textit{reducerMemory}
-\item \textit{avgShuffleTime};
-\item \textit{avgMergeTime};
-\item \textit{ioSort};
-\item \textit{spilledMapRecords};
-\end{description}
+\begin{table}
+\begin{tabular}{ |l|p {4.5 cm}| } 
+ \hline
+ Parameters & Description \\ 
+ \hline
+ mapperTime  & Total mapper time in seconds   \\ 
+ numOfMapper & Number of map tasks \\ 
+ mapperMemory & Container memory for map tasks  \\ 
+ splitSize & Input Split Size \\
+ mapperOutputBytes & Map output in bytes \\
+ mapperOutputRecords & Number of Map output records \\
+ reducerTime & Total reducer time in seconds \\
+ numOfReducer & Number of reduce tasks \\
+ bytesPerReducer & Corresponds to Hive parameter \textit{hive.exec.reducers.bytes.per.reducer} \\
+ reducerMemory & Container memory for reduce tasks \\
+ ioSort & Total amount of buffer memory in mega bytes to be used for sorting. Corresponds to Hadoop parameter \textit{mapreduce.task.io.sort.mb} \\
+ spilledMapRecords & Number of records spilled in Map tasks  \\
+ \hline
+\end{tabular}
+\caption{Parameters of the Job to be optimized}
+\label{table:job_params}
+\end{table}
 
-\subsubsection{\bf Instance configuration:} \label{subsubsec:Inst_conf}
-These define the instance configuration:
-\begin{description}
-\item \textit{nodeMemory} 
-\item \textit{cpuPerNode}
-\item \textit{vCpuPerNode}
-\end{description}
+\begin{table}
+\begin{tabular}{ |l|p {4.5 cm}| }
+ \hline
+ Parameters & Description \\ 
+ \hline
+ nodeMemory  & Total available memory per node for MR job   \\ 
+ cpuPerNode & Number of CPUs per node \\ 
+ vCpuPerNode & Number of vCPUs per node  \\ 
+ \hline
+\end{tabular}
+\caption{Instance configuration}
+\label{table:inst_conf}
+\end{table}
 
-\subsubsection{\bf Global Parameters:} \label{subsubsec:global_param}
-These are the global parameters that needs to be tuned based on workload:
-\begin{description}
-\item \textit{mapSortBufOverheadFactor}
-\item \textit{reducerConstant}
-\item \textit{maxIncreaseInMapperTime}
-\item \textit{minMapperTime}
-\item \textit{minReducerTime}
-\item \textit{ioSortToMapMemory}
-\item \textit{maxIOSort}
-\end{description}
+\begin{table}
+\begin{tabular}{ |p {1.5 cm}|p {3.5 cm}|p {1 cm} | } 
+ \hline
+ Parameters & Description & Default\\ 
+ \hline
+ ioSortFrac & Size of ioSort buffer specified as fraction of mapper memory & 0.4 \\
+ maxIOSort & Maximum value for \textit{mapreduce.task.io.sort.mb} & 2047 \\
+ \hline
+\end{tabular}
+\caption{Global Parameters}
+\label{table:global_params}
+\end{table}
 
 \noindent\subsubsection*{\bf Algorithm to optimize cumulative execution time for Hive on MR Job:}
-In this part, we would propose algorithm \ref{jobfit} to optimize cumulative execution time of Hive on Map Reduce Job  i.e., metric $\mathcal{T}$ as defined above.
+In this part, we would propose Algorithm \ref{jobfit} to optimize cumulative execution time of HIVE on MR Job  i.e., metric $\mathcal{T}$ as defined above. It takes job parameters of the job and the instance configuration on which it was collected upon. Algorithm would then try to optimize metric $\mathcal{T}$ for the new instance configuration which is the third input to the algorithm. Fourth input is Global Parameters defined in Section \ref{subsubsec:global_param} which can be tuned based on the kind of workload.
+
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 \renewcommand{\algorithmiccomment}[1]{// #1}
 \begin{algorithm}
-\caption{Job Fitting Algorithm}\label{jobfit}
+\caption{fitJob}\label{jobfit}
 \begin{algorithmic}[1]
-%\vspace{1.3em}
-%\small
 \footnotesize
-\REQUIRE  $\mathcal{P}$ is the job parameters (defined in \ref{subsubsec:job_param} ) to be optimized, $I_{old}$  is instance configuration (defined in \ref{subsubsec:Inst_conf}) on which $\mathcal{P}$ is collected, $I_{new}$ is new instance configuration on which $\mathcal{P}$ needs to be optimized upon, $\mathcal{G}$ is the global parameters defined in \ref{subsubsec:global_param}
+\REQUIRE  $\mathcal{P}$ is the job parameters (defined in Section \ref{table:job_params} ) to be optimized, $I_{old}$  is instance configuration (defined in Section \ref{table:inst_conf}) on which $\mathcal{P}$ is collected, $I_{new}$ is new instance configuration on which $\mathcal{P}$ needs to be optimized upon, $\mathcal{G}$ is the global parameters defined in Section \ref{table:global_params}
 \ENSURE New Job parameter $\mathcal{P}_{new}$ that optimize the cumulative time of containers.
-\IF {$checkFit(\mathcal{P}, I_{new})$} \RETURN $\mathcal{P}$
+\IF {checkFit($\mathcal{P}, I_{new}$)} \RETURN $\mathcal{P}$ \COMMENT {checkFit is defined in Algorithm \ref{checkfit}}
 \ENDIF
-\STATE $newMemPerCore \gets I_{new}.nodeMemory / I_{new}.vCpuPerNode$
-\STATE $\mathcal{P}_{new}.mapperMemory \gets newMemPerCore$
-\STATE $\mathcal{P}_{new}.reducerMemory \gets newMemPerCore$
-\STATE $ioSort \gets I_{new}.nodeMemory \times \textit{ioSortToMapMemory}$
-\IF {$ioSort > maxIOSort$}
-\STATE $ioSort \gets maxIOSort$
+\STATE newMemPerCore $\gets I_{new}$.nodeMemory $/ I_{new}$.vCpuPerNode
+\STATE $\mathcal{P}_{new}$.mapperMemory $\gets newMemPerCore$
+\STATE $\mathcal{P}_{new}$.reducerMemory $\gets newMemPerCore$
+\STATE ioSort $\gets$ newMemPerCore $\times$ ioSortFrac
+\IF {ioSort $>$ $\mathcal{G}$.maxIOSort}
+\STATE ioSort $\gets$ $\mathcal{G}$.maxIOSort
 \ENDIF
-\STATE $\mathcal{P}_{new}.ioSort \gets ioSort$
-\STATE $newSplitSize \gets \mathcal{P}.splitSize$
-\IF {$spilled(\mathcal{P})$}
-\STATE $outPerMap \gets \frac{\mathcal{P}.mapperOutputBytes}{\mathcal{P}.numOfMapper}$
+\STATE $\mathcal{P}_{new}$.ioSort $\gets$ ioSort
+\STATE newSplitSize $\gets$ $\mathcal{P}$.splitSize
+\IF {spilled($\mathcal{P}$)}
+\STATE outPerMap $\gets$ $\mathcal{P}$.mapperOutputBytes $/$ $\mathcal{P}$.numOfMapper
 \STATE $newSplitSize \gets \mathcal{P}.splitSize \times \frac{ioSort}{outPerMap}$
 \ELSIF {$\mathcal{P}.mapperMemory > newMemPerCore$}
 \STATE $memRatio \gets \frac{\mathcal{P}.mapperMemory}{newMemPerCore}$
@@ -124,6 +138,34 @@ In this part, we would propose algorithm \ref{jobfit} to optimize cumulative exe
 \end{algorithmic}
 \end{algorithm}
 
+\begin{algorithm}
+\caption{checkFit} \label{checkfit}
+\begin{algorithmic}[1]
+\footnotesize
+\REQUIRE $\mathcal{P}$ is the job parameters (defined in \ref{table:job_params} ), $\mathcal{I}$  is instance configuration (defined in \ref{table:inst_conf})
+\ENSURE Returns \textit{true} if $\mathcal{P}$ can fit into $\mathcal{I}$, otherwise \textit{false}.
 
+\STATE newMemPerCore $\gets \mathcal{I}.nodeMemory / \mathcal{I}.vCpuPerNode$
+\IF {newMemPerCore $> \mathcal{P}.mapperMemory$ and newMemPerCore $> \mathcal{P}.reducerMemory$}
+\RETURN \textit{true}
+\ELSE
+\RETURN \textit{false}
+\ENDIF
+\end{algorithmic}
+\end{algorithm}
 
+\noindent\subsubsection*{\bf Algorithm to optimize cost metric:}
+
+\begin{algorithm}
+\caption{optimizeCost} \label{cost_optimize}
+\begin{algorithmic}[1]
+\footnotesize
+\REQUIRE $\mathcal{P}$ is the job parameters (defined in \ref{table:job_params} ), Set $\mathcal{I} = {i_1, i_2, i_3, ...} $ set of instance configurations (defined in \ref{table:inst_conf}), Cost Metric Function $\mathcal{M}$
+\ENSURE Returns optimized job parameter across all the instance configurations in $\mathcal{I}$.
+\RETURN $\min_{\forall i \in \mathcal{I}} \mathcal{M}(fitJob(\mathcal{P}, i), i)$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Results}
+We evaluated the effectiveness of model based method by running experiments on real workloads. The experiments were carried out for a HIVE on MR engine.
 
