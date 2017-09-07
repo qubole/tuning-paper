@@ -167,5 +167,10 @@ In this part, we would propose Algorithm \ref{jobfit} to optimize cumulative exe
 \end{algorithm}
 
 \subsection{Results}
-We evaluated the effectiveness of model based method by running experiments on real workloads. The experiments were carried out for a HIVE on MR engine.
+We evaluated the effectiveness of model based method by running experiments on real workloads. The experiments were carried out for a HIVE on MR engine. To quantify the prediction error by the model, we ran an experiment on 4 queries of a customer. Figure \ref{fig:modelbasedresult} shows the benefit predicted by our model and the actual observed benefit for these queries. The actual savings closely match the predicted savings indicating that the model is sufficiently accurate.
 
+\begin{figure*}[h]
+	\includegraphics[width=\linewidth]{chart.png}
+	\caption{Model Based Result: Predicted reduction in cost versus Actual reduction in cost}
+	\label{fig:modelbasedresult}
+\end{figure*}
