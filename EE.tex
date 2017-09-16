@@ -23,7 +23,7 @@
 
 
 \begin{document}
-\title{Optimizing SQL Workloads for Big Data}
+\title{Automatic Tuning of SQL-On-Hadoop Engines on Cloud Platforms}
 
 \author{Prasad Deshpande}
 \affiliation{%
@@ -57,16 +57,21 @@
 
 
 \begin{abstract}
-Data explosion has pushed various organisation and enterprises towards large scale Big Data adoption. Due to popularity of SQL as a data language to query, manipulate and visualize data there are lot technologies that offer SQL-on-Big Data like Apache Hive, SparkSQL, Presto. These SQL-on-Big Data technologies have seen wide adoption. However, auto tuning them for performance or cost is still a big challenge and is mostly done manually by experts around. In this paper, we would evaluate and propose novel methods to optimize SQL workloads on Big Data. These query engines offer plethora of configurations to tune. General approach is to use rule of thumb to arrive at this, but that may be far from optimal configuration for the job. Our method would come up with mathematical model for Engines that can be used to arrive at optimal configuration. Our method would also suggest instance type of the cluster that would suite a particular workload. As our approach focuses on SQL workloads instead of generic Big Data Workload it has helped in greatly simplifying the model.
+More and more companies are running Big Data workloads on cloud platforms. Configuration tuning of data engines continues to be an essential but difficult undertaking. Cloud Platforms provide elasiticity of compute resources through auto-scaling and different machine types. This choice further exacerbates the problem of choosing the best configuration. ETL engineers have to choose the correct machine type as well as \# of machines along with other configuration options.
+
+In this paper, we propose to build a model that optimizes performance and cost. Cost is as important a metric as performance in cloud deployments. The model consists of rules and heuristics to optimize performance. In the next phase, the model considers the available machine types and prices to optimize cost. 
+
+We chose to focus on SQL workloads because SQL or SQL-like languages continue to be the most popular choice of ETL engineers and analysts. We show that very simple models of SQL Data Engines can provide very good recommendations compared to the optimal configuration and these are also better than those chosen by experts. Furthermore, we focus on SQL-on-Hadoop technologies but the principles behind model is generic and can be adopted for any big data engine. 
 \end{abstract}
 
-\keywords{Big Data, SQL, Hadoop performance tuning \LaTeX, text tagging}
+\keywords{Big Data, SQL, Hadoop, Hive, Presto, Spark, Automatic Performance tuning}
 
 
 \maketitle
 
 \input{intro}
 \input{related}
+\input{model}
 \input{iterative}
 \input{model-based}
 \input{samplebody-conf}

@@ -1,39 +1,26 @@
 \section{Introduction}
 
-There is humongous amount of data being produced and collected around us.
-However, such large volumes of data needs to be processed to get meaningful insights.
-Traditional Database systems cannot scale to such volumes of data.
-Most shared memory based system would not scale for Petabytes of Data. 
-Sharding can help but would not be viable option always. 
-Most disk based systems on other hands need more expensive hardware as the data volume increases.
-This has led to wide adoption of Big Data technologies everywhere and enterprises are moving their 
-data to big data platforms. On the other hand SQL has been de-facto language of choice for 
-data manipulation and data access. It is very popular data language among analysts, 
-software engineers etc to query, manipulate and visualize data. Hence, it was only imminent that 
-SQL would continue to be supported on big data platforms too. 
-There are quite a few offerings that provide SQL on big data. There are commercial products like HAWQ and many open source products like Apache Hive, SparkSQL, Presto that provides SQL for big data. SQL workloads on big data can be classified broadly into following categories based on their usage:
-\begin{description}
-  \item[$\bullet$] ETL queries
-  \item[$\bullet$] Reporting queries
-  \item[$\bullet$] Ad-hoc queries
-\end{description}
+Companies of all sizes are choosing to host their compute infrastructure on cloud platforms like AWS, Micrsoft Azure and Google Cloud Platform. 
+Administration best practices has also carried over from the data center. With experience, engineers are building for the unique properties
+of cloud platforms especially elasticity. 
 
-These technologies support running queries on structured, semi-structured data like JSON, XML etc and unstructured data. Some of the design goals of SQL on big data are following:
-\begin{description}
-  \item[$\bullet$] Cheap and horizontally scalable
-  \item[$\bullet$] High Concurrency
-  \item[$\bullet$] Low latency
-\end{description}
+Big Data Workloads are part of this trend. Big data workloads are run on the same technologies as in the data center. As Big Data infrastructure
+companies have matured, they are also building features to use elasticity in cloud platforms effectively. For example, Qubole provides Auto-scaling 
+and Heterogenous clusters are in Apache Hadoop, Apache Spark and PrestoDb clusters. 
 
+However, administration and capacity planning have not yet caught up with elasticity in cloud platforms. Organizations continue to hire experts but the 
+complexity of the big data technologies and workloads combined with elasticity is beyond abilities of humans. There are automated tools but they are 
+designed for static clusters. The tools do not consider that more machines or different machines types can be used. Moreover all the tools optimize
+for performance only (since cost is fixed after provisioning hardware in the data center) while in cloud deployments cost is also equally important. 
 
-SQL-on-Big Data has 3 layers which we have identified for optimizing SQL workloads:
-\begin{description}
-  \item[$\bullet$] Data Model:
-  There are many aspects of Data Model that can be tuned to optimize Reporting or Ad-hoc queries.
-  Historical queries can be analysed to recommend data formats for heavily used tables, recommend new partitions 
-  or columns to sort on when tables are in columnar format. This is beyond the scope of this paper and we will not discuss about them in this work.
-  \item[$\bullet$] Execution Engine:
-  In this work we have evaluated popular SQL-on-Big Data tools like Apache Hive and SparkSQL. Apache Hive runs on underlying data processing engines like Hadoop MapReduce, Apache Tez or Apache Spark. SparkSQL runs on Spark. These query engines along with underlying data processing engine offer plethora of configuration parameters to tune. This is a challenging and time consuming task even for experts. As we have observed with large installations there can be thousands of queries being fired on daily basis and manual tuning the stack to cater to most of these queries is infeasible. Even the defaults for these configurations based on general rule of thumb can be way off from the optimal configuration for a particular workload. In this work we would present mathematical model using which this process can be automated for the ETL queries that run periodically. Our work would look at one run of these queries and use it to auto tune the configuration parameters.
-  \item[$\bullet$] Cluster:
-  Performance and the cost of the Big Data Stack is heavily sensitive to the Hardware configuration of the cluster of machines they run on. Especially when these installations are on Cloud there are many machine types available with different configurations. In this work we would be able to recommend machine type for a particular workload among the multiple options provided. 
-\end{description}
+In this paper, we propose a model based approach that uses rules and heuristics to optimize performance and cost. Rules for performance optimization
+use data statistics from the catalog or previous runs. Additionally the rules use the machine type to factor in the resources available for a workload.
+The model optimizes cost by generating expected run types for all machine types and choosing the best combination of run time and price per machine.
+
+Another important factor is the focus on SQL Workloads. Prior attempts at model based approach required models to simulate every aspect of a 
+data engine. The advantage is that the approach is generic but the disadvantage is that it is complex and brittle. Prior research and our results
+show that a simple model is good enough for SQL Workloads. We compare the configuration values generated by the model with those determined by experts.
+Since experts did not choose optimal parameters, we determined optimal parameters using an iterative approach and compare with it as well.
+
+The rest of the paper is organized as follows: Section 2. explores related work. Section 3. describes an Iterative approach that provides optimal 
+configuration with higher confidence. Section 4. describes the Model-Based approach. Section 5. is the Experimental Results.
