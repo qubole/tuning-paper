@@ -1,8 +1,25 @@
 \section{Model Based Approach}
 
-We saw in section \ref{section:iter} that the iterative approach is not scalable as it is expensive to run jobs multiple times for optimizing. In this section, we will propose an alternative approach of using mathematical models to recommend new settings. In earlier part of section we would present key insights that lead us to develop simple models for Big Data SQL Engines. In latter part we would discuss a model for HIVE on MR Engine which can be used to recommend optimal settings. We would also present detailed experimental evaluation of our model.
+In the previous section, we saw that the iterative approach is not scalable as it is expensive to run jobs multiple times for optimizing. In this section, we will propose an alternative approach of using mathematical models to recommend new settings. In this approach, the cost of a query is modeled as a function of the configuration parameters. The relationship between cost and the parameters can be quite complex. To make it tractable, we apply parameter reduction as in the iterative approach~\ref{sec:paramreduction}. Earlier work~\cite{VanKen} on auto tuning Databases like MySQL and PostGres has also found that tuning only few knobs can improve performance significantly. We used this finding to choose few parameters that will impact performance significantly. 
 
-\subsection{Key Insights}
+We studied the effect of each parameter on the query cost by performing a set of experiments. Based on these results, we came up with some key insights that lead us to develop simple models for Big Data SQL Engines. We first present these experiments and insights in the earlier part of this section. In the latter part, we present a model for HIVE on MR Engine which can be used to recommend optimal settings. We present a detailed experimental evaluation of our model in the following section.
+
+\subsection{Experiments and Key Insights}
+
+The first insight is based on the experiments we did for the iterative approach. In those experiments, the metric optimized was the resource utilization (Formula~\ref{}), which depends on the memory used and the time taken by each task. If the memory used by each task (mapper/reducer/spark task) is reduced, the resource cost reduces. In practice, this saving in memory would be useful only if it could be gainfully used by some other task or job. However, for all the big data SQL engines, the memory used by all the task processes is the same. It is controlled by parameters at the query level (e.g. mapper memory, reducer memory, spark executor memory)and cannot be tuned per task. Further, the containers are allocated using Yarn, which allocates based on two dimensions - \textbf{memory} and \textbf{vcpu}. Each container is given 1 vcpu and some memory. If all the vcpus on a node are allocated and memory is still available, the extra memory cannot be used and is wasted. Conversely, if all memory is used up and extra vcpus are available, those extra vcpus are wasted since they cannot be allocated. This leads to the following conclusion:
+\begin{insight}
+	For optimal usage of both memory and vcpus, the memory/vcpu ratio of the containers should match the memory/vcpu ratio of the machine type.
+\end{insight}
+Figure \ref{fig:container_shape} illustrates the three scenarios:
+\begin{enumerate}[label=(\alph*)]
+	\item[$\bullet$] Memory/vCPU ratio of container is same as that of instance; hence, neither memory nor CPU is wasted. 
+	\item[$\bullet$] Memory/vCPU ratio of container is smaller than that of instance; hence, memory is wasted as extra memory of instance is still remaining unused after container allocation.
+	\item[$\bullet$] Memory/vCPU ratio of container is higher than that of instance; hence, CPU is wasted as extra CPU of instance is remaining unused after container allocation.
+\end{enumerate}
+This implies that memory for each container should be set according of the Memory/vCPU ratio of the machine. Thus, the memory configuration parameter (mapper memory, reducer memory or spark executor memory) need not be optimized per query and is based on the machine characteristics. Further, since memory per container is fixed, the target metric to be optimized should be the running time of the query rather than the resource utilization. We focus on this metric in the rest of the paper.
+
+
+For each parameter of interest, we ran a set of experiments where we varied that parameter, while keeping the other parameters fixed and studied the effect on the query execution cost. 
 
 We have run multiple experiments to optimize real world SQL workloads of our customers. This helped us to gain few key insights that we helped us to come with simple model. Following are those insights:
 
