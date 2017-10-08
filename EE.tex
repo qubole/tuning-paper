@@ -61,11 +61,11 @@
 
 
 \begin{abstract}
-More and more companies are running Big Data workloads on cloud platforms. Configuration tuning of data engines continues to be an essential but difficult undertaking. Cloud Platforms provide elasiticity of compute resources through auto-scaling and different machine types. This choice further exacerbates the problem of choosing the best configuration. ETL engineers have to choose the correct machine type as well as \# of machines along with other configuration options.
+More and more companies are running Big Data workloads on cloud platforms. Configuration tuning of these data engines continues to be an essential but difficult undertaking. Cloud platforms further add to this complexity due to elasiticity of compute resources and availability of different machine types. Data engineers have to choose the correct machine type as well as the number of machines along with the other configuration options.
 
-In this paper, we propose to build a model that optimizes performance and cost. Cost is as important a metric as performance in cloud deployments. The model consists of rules and heuristics to optimize performance. In the next phase, the model considers the available machine types and prices to optimize cost. 
+In this paper, we address the problem of automatically determining good configuration parameters for SQL workloads with the goal of optimizing resource usage and cost. We present two alternatives -- an iterative method based on repeatedly executing queries with different configuration parameters and a model based method based on simple rules and insights. We studied the effectiveness and practical usefulness of these methods on both synthetic and real workloads.
 
-We chose to focus on SQL workloads because SQL or SQL-like languages continue to be the most popular choice of ETL engineers and analysts. We show that very simple models of SQL Data Engines can provide very good recommendations compared to the optimal configuration and these are also better than those chosen by experts. Furthermore, we focus on SQL-on-Hadoop technologies but the principles behind model is generic and can be adopted for any big data engine. 
+We show that very simple models of SQL Data Engines can provide very good recommendations compared to the default configuration. In fact, we found that these were often better than those chosen by experts on real customer workloads. We chose to focus on SQL workloads because SQL or SQL-like languages continue to be the most popular choice of ETL engineers and analysts.  However, the principles behind our model based approach are generic and can be adopted for any big data engine. 
 \end{abstract}
 
 \keywords{Big Data, SQL, Hadoop, Hive, Presto, Spark, Automatic Performance tuning}
