@@ -1,0 +1,31 @@
+\section{Model for Cloud Platforms}
+The iterative and model based approach optimized configuration parameters for resource utilization. As argued in Insight 1, 
+resource utilization as an optimziation function is appropriate with the resources saved can be used by other tasks. On SQL-on-Hadoop
+machines, this is not true. Moreover, the memory given to a particular container is determined by the Memory/vCPU of the instance type 
+and any variation from the ratio is sub-optimial. Therefore a new optimization function focused on cumulative is more appropriate for the cloud.
+The optimization function is described in the next nextion.
+
+Next on cloud platforms, it is important recommend instance types along with configuration parameters. We extend Algorithm \ref{jobfit} to determine
+the best instance type for a SQL query.
+
+In the last section, we describe experimental results of these additions to the model.
+
+\noindent\subsubsection*{Cumulative Time Optimization Function}
+The optimization function is 
+$\mathcal{T} = \sum_{i=1}^{n} t_i$ where $n$ is number of containers and $t_i$ is execution time for $i^{th}$ container. 
+
+\noindent\subsubsection*{Algorithm}
+
+\begin{algorithm}
+\caption{optimizeCost} \label{cost_optimize}
+\begin{algorithmic}[1]
+\footnotesize
+\REQUIRE $\mathcal{P}$ is the job parameters (defined in \ref{table:job_params} ), Set $\mathcal{I} = {i_1, i_2, i_3, ...} $ set of instance configurations (defined in \ref{table:inst_conf}), Cost Metric Function $\mathcal{M}$
+\ENSURE Returns optimized job parameter across all the instance configurations in $\mathcal{I}$.
+\RETURN $\min_{\forall i \in \mathcal{I}} \mathcal{M}(fitJob(\mathcal{P}, i), i)$
+\end{algorithmic}
+\end{algorithm}
+
+\noindent\subsubsection*{Results}
+
+Here we describe the results. 
