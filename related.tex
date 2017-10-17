@@ -1,41 +1,54 @@
 \section{Related Work}
-There are earlier works which have tried to optimize Hadoop workloads. These can broadly be classified into two categories:
-\begin{description}
-\item Mathematical Model Based
-\item Actual Execution Based
-\end{description}
+Most relational databases have auto-tuning tools for physical database design. 
+Self-tuning Database Systems: A Decade of Progress\cite{Chaudhuri:2007:SDS:1325851.1325856}
+ has a good survey of research and tools in this area. Most database systems have 
+not put similar attention to determine best values of configuration parameters 
+based on workloads. Traditionally effort has focused on specific class of parameters 
+(e.g.\cite{Storm:2006:ASM:1182635.1164220} ) or on ranking
+critical configuration parameters\cite{DBLP:conf/icde/DebnathLM08}. All these techniques
+are based on using the optimizer cost model to simulate database behavior. The disadvantage is
+that the cost model may not model the effects of all important parameters.
 
-\subsection{Mathematical Model Based}
-Starfish was one of the first to model hadoop performance. In Starfish,
-a component named \textit{What-if} engine estimated the cost of Hadoop Job using Simulation and
-Hadoop Cost Model. The Cost-based optimizer (CBO) uses the what-if engine and recursive random search (RSS)
-for tuning the parameters for a new Hadoop job. There were other works like Wu et al \cite{wu2013self} that followed Starfish. These methods collect information about the jobs executed on hadoop, a process
-known as profiling. Job “signatures”, i.e., the resource utilization patterns of the jobs are used for profiling. In
+Ituned\cite{Duan:2009:TDC:1687627.1687767} is one of the first attempts to holistically 
+tune configuration parameters in modern database systems. iTuned consists of a planner
+which plans experiments and an executor that run experiments to choose the best parameters
+and the best values for a specific workload. iTuned is also a good example of a system that
+ran experiments on user workloads and queries compared to using models to simulate data engines.
+
+The popularity of Apache Hadoop ecosystem (Apache Hive, Apache Spark etc) increased interest
+in choosing configuration parameters automatically. The developers of these systems exposed
+engines parameters, documented them and encouraged users to change them based on their workload.
+The main motivation was that the type of workloads and data processed on these systems were varied
+and the default values were suboptimal. It was assumed that the administrators have to manipulate
+parameters for a successfuly installation. Similar to tools in database systems, there are two schools
+of techniques - model based and execution based.
+
+Starfish\cite{herodotou2011starfish} was one of the first to model hadoop performance. Starfish 
+consists of a \textit{profiler}, \textit{what-if} engine and a \textit{cost-based model}\cite{herodotou2011profiling}. 
+The \textit{profiler} collects statistics from previous runs of a customer workload 
+such as bytes flowing through the system and time taken. The \textit{what-if engine} simulates 
+the behavior of the Map Reduce engine and can predict the effect of changing the value 
+of a configuration parameter. The \textit{cost based optimizer} uses the \textit{what-if engine}
+and recursive random search (RSS) for tuning the parameters for a Hadoop job. The components of
+Starfish were extended with a new component - \textit{Elastisizer}\cite{Herodotou:2011:NOS:2038916.2038934}
+- to automatically size clusters on cloud platforms.  
+
+Sandeep Kumar et al.\cite{KumarPLPGB16} represent an alternate school of thought.
+Mathematical or statistical models for complex data engines is hard to build. Moreover maintenance of these models 
+is also hard as these data engines evolve. In this approach, experiments
+with alternate values of configuration parameters are are executed instead of simulated in a 
+statistical or mathematical model. The obvious disadvantage is that experiments cost money and the main 
+goal of these approaches is to make every experiment count. In \cite{KumarPLPGB16}, the authors use SPSA to 
+choose a optimal set of experiments to find the best values for a pre-determined set of configuration parameters.
+
+There are multiple approaches \cite{wu2013self} \cite{lama2012aroma} that use machine learning techniques
+to cluster jobs based on their profiles. Based on the profile, the most optimal cluster configuration is
+used. Aroma \cite{lama2012aroma} optimizes resource allocation and cost of jobs. In
 the offline phase, using a training set, the jobs are clustered
 (using variants of k-means) according to their respective signatures.
-In the online phase [21] trains a SVM which makes
-accurate and fast prediction of a job’s performance for various
-configuration parameters and input data sizes. For any
-new job, its signature is matched with the profiles of one
-of the clusters, after which that cluster’s optimal parameter
-configuration is used. In \cite{wu2013self} , the optimal parameter con-
-figuration for every cluster is obtained through simulated
-annealing, albeit for a reduced parameter search space.
-An online MapReduce performance tuner (MROnline) is
-developed in [22]. It is desgined and implemented on YARN
-[30]. MROnline consists of a centralized master component which is the online tuner. It is
-a daemon process that runs on the same machine as the
-resource manager of YARN or on a dedicated machine. Online
-tuner controls slave components that run within the
-node managers on the slave nodes of the YARN cluster. It
-consists of three components: a monitor, a tuner and a dynamic
-configurator. The monitor works together with the
-per-node slave monitors to periodically monitor application
-statistics. These statistics are sent to the centralized monitor.
-The centralized monitor then aggregates, analyzes and
-passes the information to the tuner. The tuner implements
-hill climbing algorithm to tune parameter values. The tuned
-parameter values are distributed to the slave configurators
-by the dynamic configurator. The slave configurators activate
-the new parameter values for the tasks that are running
-on their associated nodes.
+In the online phase, Aroma trains a SVM which makes
+accurate and fast prediction of a job's performance for various
+configuration parameters and input data sizes. The optimization function in Aroma considers
+the machine type, number of machines and unit cost of the machine types with a constraint on
+run time of the query. 
+  

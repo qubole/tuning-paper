@@ -6,7 +6,7 @@ The optimization function should consider both cost and performance of a workloa
 The cumulative time that a workload is scheduled on all the containers is a good proxy for the cost of the query. Therefore the cost of a query is $\mathcal{T} = \sum_{i=1}^{n} t_i$ where $n$ is number of containers and $t_i$ is execution time for $i^{th}$ container. The time factor in the equation tracks the performance of the query.
 
 \subsection{Parameters}
-From OtterTune \cite{VanKen}, a tool to auto tune Databases like MySQL and PostGres it was found that tuning only few knobs can improve performance significantly. We used this finding to choose few parameters by consulting experts in the domain. Following are the parameters of the model which would be used in the first algorithm:
+From OtterTune\cite{vanaken}, a tool to auto tune Databases like MySQL and PostGres it was found that tuning only few knobs can improve performance significantly. We used this finding to choose few parameters by consulting experts in the domain. Following are the parameters of the model which would be used in the first algorithm:
 \begin{enumerate}
     \item[$\bullet$] Job Parameters: There are the input parameters of the job that needs to be specified. Table \ref{table:job_params} defines these job parameters.
     \item[$\bullet$] Instance configuration: Table \ref{table:inst_conf} defines the machine configuration.
