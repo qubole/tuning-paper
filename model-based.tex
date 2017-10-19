@@ -5,7 +5,7 @@ Based on the insights described in the previous section, we will propose a model
 The inputs to the algorithms are:
 \begin{enumerate}
     \item[$\bullet$] Optimization Function  
-    \item[$\bullet$] Job Parameters: These are the key input parameters of the job that effect performance and cost as . Table \ref{table:job_params} defines these job parameters.
+    \item[$\bullet$] Job Parameters: These are the key input parameters of the job that effect performance and cost. Table \ref{table:job_params} defines these job parameters.
     \item[$\bullet$] Instance configuration: Table \ref{table:inst_conf} defines the machine configuration.
     \item[$\bullet$] Global Parameters: These are some of the global parameters that can be used to tune the algorithm. These are defined in Table \ref{table:global_params}.
 \end{enumerate}
@@ -21,8 +21,6 @@ Algorithm \ref{jobfit} optimizes resource utilization of a SQL query.
 \footnotesize
 \REQUIRE  $\mathcal{P}$ is the job parameters (defined in table \ref{table:job_params} ) to be recommended, $I_{old}$  is instance configuration (defined in Table \ref{table:inst_conf}) on which $\mathcal{P}$ is collected, $I_{new}$ is new instance configuration on which $\mathcal{P}$ needs to be optimized upon, $\mathcal{G}$ is the global parameters defined in Table \ref{table:global_params}
 \ENSURE New Job parameter $\mathcal{P}_{new}$ that optimize the cumulative time of containers.
-\IF {checkFit($\mathcal{P}, I_{new}$)} \RETURN $\mathcal{P}$ \COMMENT {checkFit is defined in Algorithm \ref{checkfit}}
-\ENDIF
 \STATE newMemPerCore $\gets I_{new}$.nodeMemory $/ I_{new}$.vCpuPerNode
 \STATE $\mathcal{P}_{new}$.mapperMemory $\gets newMemPerCore$
 \STATE $\mathcal{P}_{new}$.reducerMemory $\gets newMemPerCore$
@@ -31,46 +29,37 @@ Algorithm \ref{jobfit} optimizes resource utilization of a SQL query.
 \STATE ioSort $\gets$ $\mathcal{G}$.maxIOSort
 \ENDIF
 \STATE $\mathcal{P}_{new}$.ioSort $\gets$ ioSort
-\STATE newSplitSize $\gets$ $\mathcal{P}$.splitSize
-\IF {spilled($\mathcal{P}$)}
 \STATE outPerMap $\gets$ $\mathcal{P}$.mapperOutputBytes $/$ $\mathcal{P}$.numOfMapper
-\STATE $newSplitSize \gets \mathcal{P}.splitSize \times \frac{ioSort}{outPerMap}$
-\ELSIF {$\mathcal{P}.mapperMemory > newMemPerCore$}
-\STATE $memRatio \gets \frac{\mathcal{P}.mapperMemory}{newMemPerCore}$
-\STATE $newSplitSize \gets \frac{\mathcal{P}.splitSize}{memRatio} $
-\ENDIF
-\STATE $\mathcal{P}.splitSize \gets newSplitSize$
-\IF {$\mathcal{P}.reducerMemory > newMemPerCore$}
-\STATE $newBPR \gets \frac{\mathcal{P}.bytesPerReducer \times newMemPerCore}{\mathcal{P}.reducerMemory}$
-\ELSE
-\STATE $newBPR \gets \mathcal{P}.bytesPerReducer$
-\ENDIF
-\STATE $\mathcal{P}_{new}.bytesPerReducer \gets newBPR$
+\STATE newSplitSize $\gets$ $\mathcal{P}$.splitSize $\times$ ioSort $/$ outPerMap
+\STATE $\mathcal{P}_{new}$.splitSize $\gets$ newSplitSize
+\STATE newBPR $\gets$ ($\mathcal{P}$.reducerMemory $\times$ $\mathcal{P}$.mapperInputBytes) $/$ ($\mathcal{P}$.mapperOutputBytes $\times$ $\mathcal{G}$.reducerFrac)  
+\STATE $\mathcal{P}_{new}$.bytesPerReducer $\gets$ newBPR
 \STATE \RETURN $\mathcal{P}_{new}$
 \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}
-\caption{checkFit} \label{checkfit}
-\begin{algorithmic}[1]
-\footnotesize
-\REQUIRE $\mathcal{P}$ is the job parameters (defined in \ref{table:job_params} ), $\mathcal{I}$  is instance configuration (defined in \ref{table:inst_conf})
-\ENSURE Returns \textit{true} if $\mathcal{P}$ can fit into $\mathcal{I}$, otherwise \textit{false}.
-
-\STATE newMemPerCore $\gets \mathcal{I}.nodeMemory / \mathcal{I}.vCpuPerNode$
-\IF {newMemPerCore $> \mathcal{P}.mapperMemory$ and newMemPerCore $> \mathcal{P}.reducerMemory$}
-\RETURN \textit{true}
-\ELSE
-\RETURN \textit{false}
-\ENDIF
-\end{algorithmic}
-\end{algorithm}
+%\begin{algorithm}
+%\caption{checkFit} \label{checkfit}
+%\begin{algorithmic}[1]
+%\footnotesize
+%\REQUIRE $\mathcal{P}$ is the job parameters (defined in \ref{table:job_params} ), $\mathcal{I}$  is instance configuration (defined in \ref{table:inst_conf})
+%\ENSURE Returns \textit{true} if $\mathcal{P}$ can fit into $\mathcal{I}$, otherwise \textit{false}.
+%
+%\STATE newMemPerCore $\gets \mathcal{I}.nodeMemory / \mathcal{I}.vCpuPerNode$
+%\IF {newMemPerCore $> \mathcal{P}.mapperMemory$ and newMemPerCore $> \mathcal{P}.reducerMemory$}
+%\RETURN \textit{true}
+%\ELSE
+%\RETURN \textit{false}
+%\ENDIF
+%\end{algorithmic}
+%\end{algorithm}
 
 \subsection{Results}
 We evaluated the effectiveness of model based method by running experiments on real workloads. The experiments were carried out for a HIVE on MR engine. To quantify the prediction error by the model, we ran an experiment on 4 queries of a customer. Figure \ref{fig:modelbasedresult} shows the benefit predicted by our model and the actual observed benefit for these queries. The actual savings closely match the predicted savings indicating that the model is sufficiently accurate.
 
-\begin{figure*}[h]
+\begin{figure}[h]
 	\includegraphics[width=\linewidth]{chart.png}
+	%\vspace*{-15pt}
 	\caption{Model Based Result: Predicted reduction in cost versus Actual reduction in cost}
 	\label{fig:modelbasedresult}
-\end{figure*}
+\end{figure}

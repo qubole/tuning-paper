@@ -1,17 +1,18 @@
 \section{Model for Cloud Platforms}
 \label{sec:modelcloud}
 The iterative and model based approach optimized configuration parameters for resource utilization. As argued in Insight 1, 
-resource utilization as an optimziation function is appropriate with the resources saved can be used by other tasks. On SQL-on-Hadoop
+resource utilization as an optimization function is appropriate with the resources saved can be used by other tasks. On SQL-on-Hadoop
 machines, this is not true. Moreover, the memory given to a particular container is determined by the Memory/vCPU of the instance type 
-and any variation from the ratio is sub-optimial. Therefore a new optimization function focused on cumulative is more appropriate for the cloud.
-The optimization function is described in the next nextion.
+and any variation from the ratio is sub-optimal. Therefore a new optimization function focused on cumulative is more appropriate for the cloud.
+The optimization function is described in the next section.
 
-Next on cloud platforms, it is important recommend instance types along with configuration parameters. We extend Algorithm \ref{jobfit} to determine
+On cloud platforms, it is important to recommend instance types along with configuration parameters. We extend Algorithm \ref{jobfit} to determine
 the best instance type for a SQL query.
 
 In the last section, we describe experimental results of these additions to the model.
 
 \noindent\subsubsection*{Cumulative Time Optimization Function}
+\label{subsubsec:cumulative_time}
 The optimization function is 
 $\mathcal{T} = \sum_{i=1}^{n} t_i$ where $n$ is number of containers and $t_i$ is execution time for $i^{th}$ container. 
 
@@ -29,4 +30,11 @@ $\mathcal{T} = \sum_{i=1}^{n} t_i$ where $n$ is number of containers and $t_i$ i
 
 \noindent\subsubsection*{Results}
 
-Here we describe the results. 
+We evaluated new cost metric defined for cloud on our customer workload on SparkSQL. Note that we have run our experiments in our customer environment against their real world data set. Due to which we could not use the same queries used in earlier evaluation for previous cost metric. We ran our experiments on Amazon Web Services. Figure \ref{fig:modelbaseddollarresult} shows the reduction percent on absolute dollar cost of running 3 customer queries. Dollar cost is determined by the cost of running a particular AWS instance for cumulative time of running query as defined in Section \ref{subsubsec:cumulative_time}.
+
+\begin{figure}[h]
+	\includegraphics[width=\linewidth]{ModelExp.png}
+	%\vspace*{-15pt}
+	\caption{Model Based Result: Reduction percent in absolute dollar cost}
+	\label{fig:modelbaseddollarresult}
+\end{figure}

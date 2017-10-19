@@ -53,6 +53,7 @@ Different machine types on a cloud platform can have different monetary costs de
  numOfMapper & Number of map tasks \\ 
  mapperMemory & Container memory for map tasks  \\ 
  splitSize & Input Split Size \\
+ mapperInputBytes & Map input in bytes \\
  mapperOutputBytes & Map output in bytes \\
  mapperOutputRecords & Number of Map output records \\
  reducerTime & Total reducer time in seconds \\
@@ -89,6 +90,7 @@ Different machine types on a cloud platform can have different monetary costs de
  \hline
  ioSortFrac & Size of ioSort buffer specified as fraction of mapper memory & 0.4 \\
  maxIOSort & Maximum value for \textit{mapreduce.task.io.sort.mb} & 2047 \\
+ reducerFrac & Fraction of Reducer memory to be used as buffer & 0.4 \\ 
  \hline
 \end{tabular}
 \caption{Global Parameters}
