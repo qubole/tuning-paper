@@ -43,66 +43,16 @@ Different machine types on a cloud platform can have different monetary costs de
 	\label{table:job_params}
 \end{table*}
 
-\mycomment{
-\begin{table}
-\begin{tabular}{ |l|p {4.5 cm}| } 
- \hline
- Parameters & Description \\ 
- \hline
- mapperTime  & Total mapper time in seconds   \\ 
- numOfMapper & Number of map tasks \\ 
- mapperMemory & Container memory for map tasks  \\ 
- splitSize & Input Split Size \\
- mapperInputBytes & Map input in bytes \\
- mapperOutputBytes & Map output in bytes \\
- mapperOutputRecords & Number of Map output records \\
- reducerTime & Total reducer time in seconds \\
- numOfReducer & Number of reduce tasks \\
- bytesPerReducer & Corresponds to Hive parameter \textit{hive.exec.reducers.bytes.per.reducer} \\
- reducerMemory & Container memory for reduce tasks \\
- ioSort & Total amount of buffer memory in mega bytes to be used for sorting. Corresponds to Hadoop parameter \textit{mapreduce.task.io.sort.mb} \\
- spilledMapRecords & Number of records spilled in Map tasks  \\
- \hline
-\end{tabular}
-\caption{Parameters of the Job to be optimized}
-\label{table:job_params}
-\end{table}
-}
 
-\begin{table}[h]
-\begin{tabular}{ |l|p {4.5 cm}| }
- \hline
- Parameters & Description \\ 
- \hline
- nodeMemory  & Total available memory per node for MR job   \\ 
- cpuPerNode & Number of CPUs per node \\ 
- vCpuPerNode & Number of vCPUs per node  \\ 
- \hline
-\end{tabular}
-\caption{Instance configuration}
-\label{table:inst_conf}
-\end{table}
+From OtterTune\cite{vanaken}, a tool to auto tune Databases like MySQL and PostgreSQL, it was found that tuning only few knobs can improve performance significantly. This finding carries over to SQL-on-Hadoop engines as well. We chose a few critical parameters to optimize by consulting experts in the domain. These parameters that can be set for each job separately, can thus be tuned for each query in the workload. Table \ref{table:job_params} lists these job parameters for Map-reduce and Spark engine.
 
-\begin{table}[h]
-\begin{tabular}{ |p {1.5 cm}|p {3.5 cm}|p {1 cm} | } 
- \hline
- Parameters & Description & Default\\ 
- \hline
- ioSortFrac & Size of ioSort buffer specified as fraction of mapper memory & 0.4 \\
- maxIOSort & Maximum value for \textit{mapreduce.task.io.sort.mb} & 2047 \\
- reducerFrac & Fraction of Reducer memory to be used as buffer & 0.4 \\ 
- \hline
-\end{tabular}
-\caption{Global Parameters}
-\label{table:global_params}
-\end{table}
-
-From OtterTune\cite{vanaken}, a tool to auto tune Databases like MySQL and PostgreSQL, it was found that tuning only few knobs can improve performance significantly. This finding carries over to SQL-on-Hadoop engines as well. We chose a few critical parameters to optimize by consulting experts in the domain. The set parameters can be classified as follows:
+\eat{
+The set of parameters can be classified as follows:
 \begin{enumerate}
 	\item[$\bullet$] Job Parameters: These are the parameters that can be set for each job separately, can thus be tuned for each query in the workload. Table \ref{table:job_params} lists these job parameters for Map-reduce and Spark engine.
 	\item[$\bullet$] Instance configuration: These parameters are determined by the machine type and are not tunable per query. Table \ref{table:inst_conf} lists the machine type based configuration.
 	\item[$\bullet$] Global Parameters: These are some of the global parameters that are neither query nor machine dependent. They can be considered as constants and can be used to tune the algorithm. These are listed in Table \ref{table:global_params} for Map-reduce engines.
 \end{enumerate}
-
+}
 %For Map-Reduce engine, the parameters are described in Tables 1, 2 and 3.
 

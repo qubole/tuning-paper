@@ -1,14 +1,71 @@
 \section{Model Based Approach}
 \label{sec:modelbased}
-Based on the insights described in the previous section, we will propose a model for SQL-on-Hadoop engines. We will show that even though the model is simple, it is a sufficient approximation to generate to good recommendations. 
+We now propose a model for SQL-on-Hadoop engines that builds on the insights described in the previous section. We will describe the model for Hive engine on MR. Models for other engines like Spark are very similar, with just the parameters being named differently.  We will show that even though the model is simple, it is a sufficient approximation to generate good recommendations. 
 
+To model the behavior of a query, we need to know the characteristics of the data processed by the query. This includes the input data size and the output data size for each MR stage of the query processing pipeline. One way to estimate this is to use statistics such as sizes of the tables, number of distinct values for each attribute and histograms that will enable us to estimate selectivities of various operators in the query. However, getting accurate data statistics in a big data environments is very often a challenge. Since we are mainly concerned with ETL queries, we can exploit the fact that these queries are run periodically. SQL-on-Hadoop engines collect a lot metric and configuration information from the jobs that are executed in the system. The overall approach is thus to use the data collected during a run of the query as inputs to our algorithm to recommend good configuration parameters for future runs of the query. The job metrics and parameters used by the algorithm are listed in Table~\ref{table:job_metrics}. The algorithm also takes as input information about the machine instance type and configuration, as listed in Table~\ref{table:inst_conf}. Besides these, there are some global parameters that can be used to tune the algorithm, as listed in Table \ref{table:global_params}.
+
+\eat{
 The inputs to the algorithms are:
 \begin{enumerate}
-    \item[$\bullet$] Optimization Function  
     \item[$\bullet$] Job Parameters: These are the key input parameters of the job that effect performance and cost. Table \ref{table:job_params} defines these job parameters.
     \item[$\bullet$] Instance configuration: Table \ref{table:inst_conf} defines the machine configuration.
     \item[$\bullet$] Global Parameters: These are some of the global parameters that can be used to tune the algorithm. These are defined in Table \ref{table:global_params}.
 \end{enumerate}
+}
+
+\begin{table}
+\begin{tabular}{ |l|p {4.5 cm}| } 
+ \hline
+ Parameters & Description \\ 
+ \hline
+ mapperTime  & Total mapper time in seconds   \\ 
+ numOfMapper & Number of map tasks \\ 
+ mapperMemory & Container memory for map tasks  \\ 
+ splitSize & Input Split Size \\
+ mapperInputBytes & Map input in bytes \\
+ mapperOutputBytes & Map output in bytes \\
+ mapperOutputRecords & Number of Map output records \\
+ reducerTime & Total reducer time in seconds \\
+ numOfReducer & Number of reduce tasks \\
+ bytesPerReducer & Corresponds to Hive parameter \textit{hive.exec.reducers.bytes.per.reducer} \\
+ reducerMemory & Container memory for reduce tasks \\
+ ioSort & Total amount of buffer memory in mega bytes to be used for sorting. Corresponds to Hadoop parameter \textit{mapreduce.task.io.sort.mb} \\
+ spilledMapRecords & Number of records spilled in Map tasks  \\
+ \hline
+\end{tabular}
+\caption{Job metrics and parameters}
+\label{table:job_metrics}
+\end{table}
+
+\begin{table}[h]
+\begin{tabular}{ |l|p {4.5 cm}| }
+ \hline
+ Parameters & Description \\ 
+ \hline
+ nodeMemory  & Total available memory per node for MR job   \\ 
+ cpuPerNode & Number of CPUs per node \\ 
+ vCpuPerNode & Number of vCPUs per node  \\ 
+ \hline
+\end{tabular}
+\caption{Instance configuration}
+\label{table:inst_conf}
+\end{table}
+
+\begin{table}[h]
+\begin{tabular}{ |p {1.5 cm}|p {3.5 cm}|p {1 cm} | } 
+ \hline
+ Parameters & Description & Default\\ 
+ \hline
+ ioSortFrac & Size of ioSort buffer specified as fraction of mapper memory & 0.4 \\
+ maxIOSort & Maximum value for \textit{mapreduce.task.io.sort.mb} & 2047 \\
+ reducerFrac & Fraction of Reducer memory to be used as buffer & 0.4 \\ 
+ \hline
+\end{tabular}
+\caption{Global Parameters}
+\label{table:global_params}
+\end{table}
+
+
 
 Algorithm \ref{jobfit} optimizes resource utilization of a SQL query. 
 
