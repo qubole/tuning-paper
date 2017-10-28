@@ -3,28 +3,6 @@
 In the previous section, we saw that the iterative approach is not scalable as it is expensive to run jobs multiple times. Therefore we set upon an alternative approach of using mathematical models to recommend new settings. In this section, we study the effect of each parameters on the query cost by performing a set of experiments. These experiments provided key insights that will be the basis to develop a simple mathematical model. 
 The assumptions made in the iterative approach continue to be applicable. The experiments focus on a few key parameters, the values are discretized, range of values for each parameter is bounded and the dimensions are independent of each other. 
 
-\noindent\subsubsection*{Memory per container}
-The first insight is based on the experiments we did for the iterative approach. In those experiments, the metric optimized was the resource utilization (Formula~\ref{}), which depends on the memory used and the time taken by each task. If the memory used by each task (mapper/reducer/spark task) is reduced, the resource cost reduces. In practice, this saving in memory would be useful only if it could be gainfully used by some other task or job. However, for all the big data SQL engines, the memory used by all the task processes is the same. It is controlled by parameters at the query level (e.g. mapper memory, reducer memory, spark executor memory)and cannot be tuned per task. Further, the containers are allocated using Yarn, which allocates based on two dimensions - \textbf{memory} and \textbf{vcpu}. Each container is given 1 vcpu and some memory. If all the vcpus on a node are allocated and memory is still available, the extra memory cannot be used and is wasted. Conversely, if all memory is used up and extra vcpus are available, those extra vcpus are wasted since they cannot be allocated. This leads to the following conclusion:
-\begin{insight}
-	For optimal usage of both memory and vcpus, the memory/vcpu ratio of the containers should match the memory/vcpu ratio of the machine type.
-\end{insight}
-
-\begin{figure*}[h]
-	\includegraphics[width=0.3\linewidth]{container_shape1.png} 
-	\includegraphics[width=0.3\linewidth]{container_shape2.png}
-	\includegraphics[width=0.3\linewidth]{container_shape3.png}
-	%\vspace*{-15pt}
-	\caption{\textbf{(a)} No Resource is wasted \textbf{(b)} Memory is wasted \textbf{(c)} CPU is wasted}
-	\label{fig:container_shape}
-\end{figure*}
-
-Figure \ref{fig:container_shape} illustrates the three scenarios:
-\begin{enumerate}[label=(\alph*)]
-	\item[$\bullet$] Memory/vCPU ratio of container is same as that of instance; hence, neither memory nor CPU is wasted. 
-	\item[$\bullet$] Memory/vCPU ratio of container is smaller than that of instance; hence, memory is wasted as extra memory of instance is still remaining unused after container allocation.
-	\item[$\bullet$] Memory/vCPU ratio of container is higher than that of instance; hence, CPU is wasted as extra CPU of instance is remaining unused after container allocation.
-\end{enumerate}
-This implies that memory for each container should be set according of the Memory/vCPU ratio of the machine. Thus, the memory configuration parameter (mapper memory, reducer memory or spark executor memory) need not be optimized per query and is based on the machine characteristics. Further, since memory per container is fixed, the target metric to be optimized should be the cumulative cpu time of the query rather than the resource utilization.
 
 
 \subsubsection*{Memory and partition size}
@@ -45,6 +23,7 @@ In the first set of experiments, we varied the partition size of the mapper task
 In the second set of experiments, we varied the partition sizes for the reducer tasks by varying the %$spark.sql.
 $shuffle.partitions$ parameter from 50 to 800. This varies the number of reducer partitions and correspondingly the amount of data processed by each reducer task. The original TPC DS queries have many filters on the input tables, due to which the mappers process lots of data and the reducers process very less data. The overall time is thus dominated by the mapper tasks. To make this experiment on the reducer parallelism meaningful, we modified the queries to remove all the filters. After this change, the reducer tasks become a significant part of the overall query and changes in reducer times reflect in the overall query times. Figure~\ref{fig:varyreducers} shows the variations in the cumulative time with the number of partitions. As before, the overall time for the query increases with parallelism, due to increased overheads. The increase is moderate, for e.g., the 16 times increase in parallelism leads to an average slowdown of 47\%. These experiments lead to the next insight:
 \begin{insight}
+	\label{insight:parallelism}
 	The parallelism of a query can be increased without significant adverse effect to the cumulative time. At the same time, it should not be increased indiscriminately since the increased parallelism leads to increased overheads and increases the overall cumulative time.
 \end{insight}
 The increased overheads are due to managing a larger number of tasks and increase in the number of communicating channels. For MR engine, the overhead of starting a JVM for each task can further add to the overhead.
@@ -59,6 +38,7 @@ The increased overheads are due to managing a larger number of tasks and increas
 
 In some of the experiments with the reducer parallelism, we could observe the effect of spills on the query time. Instead of the query time increasing with the parallelism, it decreased significantly. For example, Figure~\ref{fig:q46} shows the graph for $q46$, in which the time reduces by almost 30\% when the number of shuffle partitions increases from 100 to 200. This is due to the fact that at 100 partitions, the amount of data processed by the reducer task does not fit in memory and causes a spill. As the number of partitions increases to 200, each partition becomes smaller and fits in memory, thus avoiding a spill. This leads to the following insight:
 \begin{insight}
+	\label{insight:spill}
 	Spills are expensive as each spill leads to an extra write and read of the data. Thus, spills should be avoided at all costs.
 \end{insight}
 Spills can be avoided by providing adequate memory to each task or by by making more fine grained tasks. Since the memory for each container is fixed, we can either reduce the splitsize (for input mapper tasks) or increase the reducer parallelism (for reducer tasks) so that each task processes only data that can fit in its available memory without causing a spill.
@@ -85,6 +65,7 @@ Cloud platforms provide a variety of machines which differ in various characteri
 This behavior is due to the way memory is used by the SQL engines. The memory is mainly used to hold the partition processed by the container (as io.sort.mb in MR and to hold the rdd in Spark). Once there is enough memory to hold the partition in memory (thus avoiding spills), any increase beyond that does not have any additional benefit.
 As long as tasks do not spill, the total work done in terms of IO, CPU and network traffic is independent of the available memory and the parallelism factor of the tasks. This leads to the following insight:
 \begin{insight}
+	\label{insight:mem}
 	For a query, the memory per task can be decreased safely without performance degradation by correspondingly decreasing the partition size (increasing parallelism) if needed to avoid spills.
 \end{insight}
 This implies that 
@@ -93,6 +74,7 @@ if a job can be tuned to avoid spills on a cheaper instance with same compute bu
 \subsubsection*{Cores per executor}
 For Spark engines, there is an additional parameter of cores per executor. Given a certain number of cores per machine, we have a choice of either running many executors with fewer cores per executor (thin executors), or fewer executors with more cores per executor (fat executors). We studied the effect of various choices by varying the $spark.executor.cores$ from 1 to 8 and correspondingly varying $spark.executor.memory$ from 1152MB to 11094MB. The memory per executor core is the same in all cases. Figure~\ref{fig:varycore} shows the variation in the cumulative time with number of cores. It can be observed that fat executors generally provide better performance. On an average, there was a 25\% speedup on using 8 cores per executor compared to 1 core per executor. Fatter executors perform better because of several reasons such as  better memory utilization across cores in a executor, reduced number of replicas of broadcast tables and lesser overheads due to more tasks running in the same executor process. This leads to the following insight specific to Spark engines:
 \begin{insight}
+	\label{insight:executorcore}
 	Use a single fat executor for each node that uses up all the cores on the node rather many thin executors.
 \end{insight}
 

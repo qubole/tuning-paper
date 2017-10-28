@@ -1,34 +1,98 @@
 \section{Model for Cloud Platforms}
 \label{sec:modelcloud}
-The iterative and model based approach optimized configuration parameters for resource utilization. As argued in Insight 1, 
-resource utilization as an optimization function is appropriate with the resources saved can be used by other tasks. On SQL-on-Hadoop
-machines, this is not true. Moreover, the memory given to a particular container is determined by the Memory/vCPU of the instance type 
-and any variation from the ratio is sub-optimal. Therefore a new optimization function focused on cumulative is more appropriate for the cloud.
-The optimization function is described in the next section.
+We will now consider the usage of model based methods for SQL-on-Hadoop engines on cloud platforms. Cloud based platforms have their own peculiarities that necessiates revisiting the algorithm proposed in the previous section. 
 
-On cloud platforms, it is important to recommend instance types along with configuration parameters. We extend Algorithm \ref{jobfit} to determine
-the best instance type for a SQL query.
+\subsection{Characteristics of Cloud platforms}
+Cloud platforms provide additional flexibility due to the elastic nature of the cloud and the choice of different instance types.
 
-In the last section, we describe experimental results of these additions to the model.
+\noindent\subsubsection*{Cloud elasticity}
+ In the cloud, the physical resource for the cluster are not committed forever. Clusters can be spun up and shut down on demand. In the iterative and model based experiments till now, we have focused on the cumulative resource usage metric (Equation~\ref{eqn:totalresource}), which was mainly achieved by reducing the memory usage of the containers. 
+In practice, this saving in memory would be useful only if it could be gainfully used by some other task or job. However, for all the big data SQL engines, the memory used by all the task processes is the same. It is controlled by parameters at the query level (e.g. mapper memory, reducer memory, spark executor memory)and cannot be tuned per task.
+Further, each workload will use its own dynamic cluster in a Cloud setting, which implies that other workloads cannot use the memory saved either. 
 
-\noindent\subsubsection*{Cumulative Time Optimization Function}
-\label{subsubsec:cumulative_time}
-The optimization function is 
-$\mathcal{T} = \sum_{i=1}^{n} t_i$ where $n$ is number of containers and $t_i$ is execution time for $i^{th}$ container. 
+Thus saving memory may not be very useful and should not be the main criterion. Let us look at memory allocation in further detail. In SQL-on-Hadoop systems, containers are allocated using Yarn, which allocates based on two dimensions - \textbf{memory} and \textbf{vcpu}. Each container is given 1 vcpu and some memory. If all the vcpus on a node are allocated and memory is still available, the extra memory cannot be used and is wasted. Conversely, if all memory is used up and extra vcpus are available, those extra vcpus are wasted since they cannot be allocated. 
+Figure \ref{fig:container_shape} illustrates the three scenarios:
+\begin{enumerate}[label=(\alph*)]
+	\item[$\bullet$] Memory/vCPU ratio of container is same as that of instance; hence, neither memory nor CPU is wasted. 
+	\item[$\bullet$] Memory/vCPU ratio of container is smaller than that of instance; hence, memory is wasted as extra memory of instance is still remaining unused after container allocation.
+	\item[$\bullet$] Memory/vCPU ratio of container is higher than that of instance; hence, CPU is wasted as extra CPU of instance is remaining unused after container allocation.
+\end{enumerate}
+\begin{figure*}[h]
+	\includegraphics[width=0.3\linewidth]{container_shape1.png} 
+	\includegraphics[width=0.3\linewidth]{container_shape2.png}
+	\includegraphics[width=0.3\linewidth]{container_shape3.png}
+	%\vspace*{-15pt}
+	\caption{\textbf{(a)} No Resource is wasted \textbf{(b)} Memory is wasted \textbf{(c)} CPU is wasted}
+	\label{fig:container_shape}
+\end{figure*}
 
-\noindent\subsubsection*{Algorithm}
+This implies that memory for each container should be set according of the Memory/vCPU ratio of the machine which leads to the following conclusion:
+\begin{insight}
+	\label{insight:memcpu}
+	For optimal usage of both memory and vcpus, the memory/vcpu ratio of the containers should match the memory/vcpu ratio of the machine type.
+\end{insight}
+Thus, the memory configuration parameter (mapper memory, reducer memory or spark executor memory) need not be optimized per query and is based on the machine characteristics. Further, since memory per container is fixed, the target metric to be optimized should be the cumulative cpu time (Equation~\ref{eqn:totaltime}) of the query rather than the resource utilization. 
+
+\noindent\subsubsection*{Instance types}
+
+Cloud platforms provide a choice of different instance types, each of which may have different dollar costs. Thus, it is important to recommend instance types along with configuration parameters. The metric that matters the most in this case is the total dollar cost (Equation~\ref{eqn:totalcost}).
+
+\subsection{Algorithm}
+
+
+
+\begin{algorithm}
+	\caption{fitJob}\label{jobfit}
+	\begin{algorithmic}[1]
+		\footnotesize
+		\REQUIRE  $\mathcal{P}$ is the job parameters (defined in table \ref{table:job_params} ) to be recommended, $I_{old}$  is instance configuration (defined in Table \ref{table:inst_conf}) on which $\mathcal{P}$ is collected, $I_{new}$ is new instance configuration on which $\mathcal{P}$ needs to be optimized upon, $\mathcal{G}$ is the global parameters defined in Table \ref{table:global_params}
+		\ENSURE New Job parameter $\mathcal{P}_{new}$ that optimize the cumulative time of containers.
+		\STATE newMemPerCore $\gets I_{new}$.nodeMemory $/ I_{new}$.vCpuPerNode
+		\STATE $\mathcal{P}_{new}$.mapperMemory $\gets newMemPerCore$
+		\STATE $\mathcal{P}_{new}$.reducerMemory $\gets newMemPerCore$
+		\STATE ioSort $\gets$ newMemPerCore $\times$ ioSortFrac
+		\IF {ioSort $>$ $\mathcal{G}$.maxIOSort}
+		\STATE ioSort $\gets$ $\mathcal{G}$.maxIOSort
+		\ENDIF
+		\STATE $\mathcal{P}_{new}$.ioSort $\gets$ ioSort
+		\STATE outPerMap $\gets$ $\mathcal{P}$.mapperOutputBytes $/$ $\mathcal{P}$.numOfMapper
+		\STATE newSplitSize $\gets$ $\mathcal{P}$.splitSize $\times$ ioSort $/$ outPerMap
+		\STATE $\mathcal{P}_{new}$.splitSize $\gets$ newSplitSize
+		\STATE newBPR $\gets$ ($\mathcal{P}$.reducerMemory $\times$ $\mathcal{P}$.mapperInputBytes) $/$ ($\mathcal{P}$.mapperOutputBytes $\times$ $\mathcal{G}$.reducerFrac)  
+		\STATE $\mathcal{P}_{new}$.bytesPerReducer $\gets$ newBPR
+		\STATE \RETURN $\mathcal{P}_{new}$
+	\end{algorithmic}
+\end{algorithm}
+
+The algorithm consists of two parts -- $fitJob$ (Algorithm\ref{jobfit}) that finds the optimal parameters on a given instance type and $optimizeCost$ (Algorithm~\ref{cost_optimize}) that searches across instance types to determine the best instance type to be used. 
+
+Algorithm $fitJob$ is analogous to $OptResource$, but also takes the instance type $I_{new}$ as input. Instead of choosing the smallest possible $splitSize$ like $OptResource$, it starts with fixing $mapperMemory$ and $reducerMemory$ based on the memory available per core in the instance type being considered (lines 2--3). Based on this, the $ioSort$ is computed (lines 4--8). This is followed by computing the $splitSize$, such that the output of that split partition fits in the $ioSort$ and does not cause any spill (lines 9--11). Similarly, the $bytesPerReducer$ is computed such that the amount of mapper output data processed by each reducer fits in the reducer buffer without causing spills (lines 12--13). The algorithm also computes the estimated cumulative time.
+
+Algorithm $optimizeCost$ searches for the best instance type. It iterates over all the available instance types and calls $fitJob$ to find the best configuration and cumulative time for each type (line 2). It computes the dollar cost  of the query using the rental rate per core per unit time $r$ using Equation~\ref{eqn:totalcost} (line 3). The instance type leading to the least dollar cost and the configuration corresponding to that instance are finally output by the algorithm.
+
+%In the last section, we describe experimental results of these additions to the model.
 
 \begin{algorithm}
 \caption{optimizeCost} \label{cost_optimize}
 \begin{algorithmic}[1]
 \footnotesize
-\REQUIRE $\mathcal{P}$ is the job parameters (defined in \ref{table:job_params} ), Set $\mathcal{I} = {i_1, i_2, i_3, ...} $ set of instance configurations (defined in \ref{table:inst_conf}), Cost Metric Function $\mathcal{M}$
-\ENSURE Returns optimized job parameter across all the instance configurations in $\mathcal{I}$.
-\RETURN $\min_{\forall i \in \mathcal{I}} \mathcal{M}(fitJob(\mathcal{P}, i), i)$
+\REQUIRE $\mathcal{P}$ is the job parameters (defined in \ref{table:job_params} ), Set $\mathcal{I} = {i_1, i_2, i_3, \ldots i_n} $ set of instance configurations (defined in \ref{table:inst_conf}), rental rates per core per unit time for each type $\mathcal{R}={r_1, r_2, \ldots r_n}$
+\ENSURE Returns optimized instance type and job parameters across all the instance configurations in $\mathcal{I}$.
+\FOR {$x$ = 1, 2 \ldots n}
+	\STATE $config, time \gets fitJob(\mathcal{P}, i_x)$
+	\STATE $cost \gets  bestTime \times r_x$  
+	\IF {$cost < bestCost$}
+		\STATE $bestCost \gets cost$;
+		$bestInstance \gets i_x$;
+		$bestConfig \gets config$
+	\ENDIF
+\ENDFOR
+
+\RETURN $bestInstance, bestConfig$
 \end{algorithmic}
 \end{algorithm}
 
-\noindent\subsubsection*{Results}
+\subsection{Results}
 
 We evaluated new cost metric defined for cloud on our customer workload on SparkSQL. Note that we have run our experiments in our customer environment against their real world data set. Due to which we could not use the same queries used in earlier evaluation for previous cost metric. We ran our experiments on Amazon Web Services. Figure \ref{fig:modelbaseddollarresult} shows the reduction percent on absolute dollar cost of running 3 customer queries. Dollar cost is determined by the cost of running a particular AWS instance for cumulative time of running query as defined in Section \ref{subsubsec:cumulative_time}.
 
