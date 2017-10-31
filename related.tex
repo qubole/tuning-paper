@@ -15,7 +15,8 @@ tune configuration parameters in modern database systems. iTuned consists of a p
 which plans experiments and an executor that run experiments to choose the best parameters
 and the best values for a specific workload. iTuned is also a good example of a system that
 ran experiments on user workloads and queries compared to using models to simulate data engines.
-
+Our preferred approach focuses on SQL-on-Hadoop engine and uses models to eliminate cost of experiments.
+ 
 The popularity of Apache Hadoop ecosystem (Apache Hive, Apache Spark etc) increased interest
 in choosing configuration parameters automatically. The developers of these systems exposed
 engines parameters, documented them and encouraged users to change them based on their workload.
@@ -32,15 +33,8 @@ the behavior of the Map Reduce engine and can predict the effect of changing the
 of a configuration parameter. The \textit{cost based optimizer} uses the \textit{what-if engine}
 and recursive random search (RSS) for tuning the parameters for a Hadoop job. The components of
 Starfish were extended with a new component - \textit{Elastisizer}\cite{Herodotou:2011:NOS:2038916.2038934}
-- to automatically size clusters on cloud platforms.  
-
-Sandeep Kumar et al.\cite{KumarPLPGB16} represent an alternate school of thought.
-Mathematical or statistical models for complex data engines is hard to build. Moreover maintenance of these models 
-is also hard as these data engines evolve. In this approach, experiments
-with alternate values of configuration parameters are are executed instead of simulated in a 
-statistical or mathematical model. The obvious disadvantage is that experiments cost money and the main 
-goal of these approaches is to make every experiment count. In \cite{KumarPLPGB16}, the authors use SPSA to 
-choose a optimal set of experiments to find the best values for a pre-determined set of configuration parameters.
+- to automatically size clusters on cloud platforms. Our approach uses a very simple model. This approach
+is practical because we focus on common SQL operations. 
 
 There are multiple approaches \cite{wu2013self} \cite{lama2012aroma} that use machine learning techniques
 to cluster jobs based on their profiles. Based on the profile, the most optimal cluster configuration is
@@ -51,5 +45,16 @@ In the online phase, Aroma trains a SVM which makes
 accurate and fast prediction of a job's performance for various
 configuration parameters and input data sizes. The optimization function in Aroma considers
 the machine type, number of machines and unit cost of the machine types with a constraint on
-run time of the query. 
+run time of the query. Our approach uses a mathematical model instead of statistical or machine learning approaches. 
+ 
+CherryPick\cite{Li:2014:MMO:2600212.2600229} and Sandeep Kumar et al.\cite{KumarPLPGB16} represent an alternate school of thought.
+Mathematical or statistical models for complex data engines is hard to build. Moreover maintenance of these models 
+is also hard as these data engines evolve. In this approach, experiments
+with alternate values of configuration parameters are are executed instead of simulated in a 
+statistical or mathematical model. The obvious disadvantage is that experiments cost money and the main 
+goal of these approaches is to make every experiment count. In \cite{KumarPLPGB16}, the authors use SPSA and Bayesian Optimization in \cite{Li:2014:MMO:2600212.2600229} 
+to choose a optimal set of experiments to find the best values for a pre-determined set of configuration parameters.
+In Section~\ref{section:iter} we tried an iterative execution approach and found it to be impractical in terms of dollar cost. 
+At the same time it is hard to manage detailed models of complex engine and therefore
+we propose a simple model specialized for SQL-on-Hadoop engines.
   
