@@ -123,6 +123,15 @@ Figure \ref{fig:modelbasedresult} shows the benefit predicted by our model and t
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{chart.png}
 	%\vspace*{-15pt}
-	\caption{Model Based Result: Predicted reduction in cost versus Actual reduction in cost}
+	\caption{Model Based Result: Predicted reduction in cost versus Actual reduction in cost for HIVE on MR queries}
 	\label{fig:modelbasedresult}
+\end{figure}
+
+We also evaluated effectiveness of the same technique on SparkSQL. Algorithm for it is very similar to $OptResource$ and we are skipping it for brevity. We ran it on 3 real world SparkSQL customer queries. Figure \ref{fig:modelbasedresultspark} shows that the predicted percent reduction in cost matches that of actual reduction is cost observed with very high accuracy.
+
+\begin{figure}[h]
+	\includegraphics[width=\linewidth]{chart_spark.png}
+	%\vspace*{-15pt}
+	\caption{Model Based Result: Predicted reduction in cost versus Actual reduction in cost for SparkSQL queries}
+	\label{fig:modelbasedresultspark}
 \end{figure}

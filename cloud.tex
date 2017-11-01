@@ -130,7 +130,7 @@ Algorithm \textbf{fitJobSpark} defined in Algorithm \ref{jobfitspark} is similar
 
 \subsection{Results}
 
-We evaluated new cost metric defined for cloud on our customer workload on SparkSQL. Note that we have run our experiments in our customer environment against their real world data set. Due to which we could not use the same queries used in earlier evaluation for previous cost metric. We ran our experiments on Amazon Web Services. Figure \ref{fig:modelbaseddollarresult} shows the reduction percent on absolute dollar cost of running 3 customer queries. Dollar cost is determined by the cost of running a particular AWS instance for cumulative time of running query as defined in Section \ref{subsubsec:cumulative_time}.
+We evaluated new cost metric defined for cloud on the same SparkSQL customer queries which were evaluated in Figure ~\ref{fig:modelbasedresultspark}.  We ran our experiments on Amazon Web Services. Figure \ref{fig:modelbaseddollarresult} shows the reduction percent on absolute dollar cost of running 3 customer queries. Dollar cost is determined by the cost of running a particular AWS instance for cumulative time of running query as defined in Section \ref{subsubsec:cumulative_time}.
 
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{ModelExp.png}
