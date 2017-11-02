@@ -68,7 +68,7 @@ Algorithm \textbf{fitJobMR} is analogous to $OptResource$, but also takes the in
 
 Algorithm $optimizeCost$ searches for the best instance type. It iterates over all the available instance types and calls \textbf{fitJobMR} to find the best configuration and cumulative time for each type (line 2). It computes the dollar cost  of the query using the rental rate per core per unit time $r$ using Equation~\ref{eqn:totalcost} (line 3). The instance type leading to the least dollar cost and the configuration corresponding to that instance are finally output by the algorithm.
 
-Algorithm \textbf{fitJobSpark} defined in Algorithm \ref{jobfitspark} is similar to \textbf{fitJobMR} but for SparkSQL Jobs instead of Hive on MR jobs. Algorithm \textbf{fitJobSpark} takes set of stage parameters (defined in Table~\ref{table:stage_params}) $\mathcal{S}$ as input along with instance and global parameter as in \textbf{fitJobMR}.
+Algorithm \textbf{fitJobSpark} defined in Algorithm \ref{jobfitspark} is similar to \textbf{fitJobMR} but for SparkSQL Jobs instead of Hive on MR jobs. Algorithm \textbf{fitJobSpark} takes a set of stage parameters (defined in Table~\ref{table:stage_params}) $\mathcal{S}$ as input along with instance and global parameter as in \textbf{fitJobMR}.
 
 \begin{table}[h]
 \begin{tabular}{ |l|p {4.5 cm}| }
@@ -130,7 +130,7 @@ Algorithm \textbf{fitJobSpark} defined in Algorithm \ref{jobfitspark} is similar
 
 \subsection{Results}
 
-We evaluated new cost metric defined for cloud on the same SparkSQL customer queries which were evaluated in Figure ~\ref{fig:modelbasedresultspark}.  We ran our experiments on Amazon Web Services. Figure \ref{fig:modelbaseddollarresult} shows the reduction percent on absolute dollar cost of running 3 customer queries. Dollar cost is determined by the cost of running a particular AWS instance for cumulative time of running query as defined in Section \ref{subsubsec:cumulative_time}.
+We evaluated new cost metric defined for cloud on the same SparkSQL customer queries which were evaluated in Figure ~\ref{fig:modelbasedresultspark}.  We ran our experiments on Amazon Web Services. Figure \ref{fig:modelbaseddollarresult} shows the reduction percent on absolute dollar cost of running 3 customer queries. Dollar cost is determined by the cost of running a particular AWS instance for cumulative time of running query as defined in Section~\ref{sec:optmethod}.
 
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{ModelExp.png}

@@ -24,10 +24,10 @@ The rest of the paper is organized as follows. Section~\ref{sec:relatedwork} giv
 \noindent\subsubsection*{Experimental Setup}
 Qubole\cite{qubole} provides proprietary versions of Apache Hive\cite{thusoo2009hive}, Apache Spark\cite{zaharia2016apache} and Facebook Presto\cite{presto} to its customers.
 All experiments were run on Apache Hive and Apache Spark using Qubole Data Service (QDS) on Amazon Web Services (AWS). 
-The proprietary extensions on QDS do not affect the generality of the experiments.  
+The models and experiments do not use any proprietary extensions of QDS.  
 Due to budget and contract constraints, we have presented results from different customer workloads which consists of different data, queries, engine, cluster and machine configuration.
-To ensure consistency, we present results on a single engine type in each section or from both to show that the results are valid for both engines. Results in each section are self-contained
-and independent. Moreover the variety of experiments and setup show the versatility of our approach. 
+To ensure consistency, we present results for each approach (iterative, model and cloud model) from a single company using a specific dataset, query set and data engine. 
+Results for each approach are self-contained and independent. Moreover the variety of experiments and setup show the versatility of our approach. 
 
 A brief overview of the customers who provided permission to run experiments and their technology stack are:
 \begin{enumerate}
