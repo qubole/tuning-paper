@@ -130,11 +130,28 @@ Algorithm \textbf{fitJobSpark} defined in Algorithm \ref{jobfitspark} is similar
 
 \subsection{Results}
 
-We evaluated new cost metric defined for cloud on the same SparkSQL customer queries which were evaluated in Figure ~\ref{fig:modelbasedresultspark}.  We ran our experiments on Amazon Web Services. Figure \ref{fig:modelbaseddollarresult} shows the reduction percent on absolute dollar cost of running 3 customer queries. Dollar cost is determined by the cost of running a particular AWS instance for cumulative time of running query as defined in Section~\ref{sec:optmethod}.
+We evaluated the new cost metric defined for cloud on a synthetic workload as well as the same SparkSQL customer queries which were evaluated in Figure ~\ref{fig:modelbasedresultspark}. 
+
+\subsubsection*{Synthetic Workload}
+For the synthetic workload, we used the TPC DS dataset (scale 1000) and a subset of the queries. The experiments
+were run on a 4-node cluster on AWS with machine type r3.4xlarge running SparkSQL on an Apache Spark cluster. We chose this specific machine type as it is the 
+most popular machine type in Qubole Data Service. The cloud model suggested that it is cheaper to run these 
+queries on c3 family of machines. We reran the queries on a 4-node cluster with machine type c3.4xlarge. 
+Figure \ref{fig:syntheticcloudmodel} shows the reduction percent on absolute dollar cost of running a subset of the
+TPC DS queries. Dollar cost is determined by the cost of running a particular AWS instance for cumulative time of running query as defined in Section~\ref{sec:optmethod}.
+\begin{figure}[h]
+	\includegraphics[width=\linewidth]{CloudSyn.png}
+	%\vspace*{-15pt}
+	\caption{Synthetic workload reduction in absolute dollar cost}
+	\label{fig:syntheticcloudmodel}
+\end{figure}
+
+\subsubsection*{Real Workloads}
+We ran our experiments on Amazon Web Services. Figure \ref{fig:modelbaseddollarresult} shows the reduction percent on absolute dollar cost of running 3 customer queries. 
 
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{ModelExp.png}
 	%\vspace*{-15pt}
-	\caption{Reduction in absolute dollar cost}
+	\caption{Real workload reduction in absolute dollar cost}
 	\label{fig:modelbaseddollarresult}
 \end{figure}
