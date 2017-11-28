@@ -2,7 +2,7 @@
 In the first approach, we actually execute each query multiple times with different configuration parameters to determine the optimal set of parameters. For each candidate set of configuration parameters, the query is run and the target metric, such as total resource usage, is measured. By comparing the metrics across different runs with different configuration parameters, we can determine a good set of parameters to use. 
 
 \subsection{Assumptions}
-
+\label{sec:assumptions}
 \begin{figure*}[h]
 	\includegraphics[width=\linewidth]{fig/searchspace.png}
 	%\vspace*{-15pt}
@@ -24,7 +24,7 @@ The range of values for each parameter is further restricted based on domain kno
 We make an assumption that the parameters are not correlated to each other. This enables us to optimize each parameter independently of the others. Thus, rather than exploring all the points in the search space, the algorithm explores only one set of values for each parameter as show in Figure~\ref{fig:searchspace}(d). This is a very strong assumption, which may not hold in practice. For example, the mapper memory (mapreduce.map.memory.mb) and the splitsize (mapreduce.input.fileinputformat.split.maxsize) are correlated, since more memory is needed by the mappers as the splitsize increases if spills are to be avoided. Even in this case, the algorithm will find the best value for memory after fixing the splitsize or the best splitsize after fixing the memory. So overall the configuration chosen will be a reasonably good one.
 
 \subsection{Algorithm}
-The overall algorithm is listed in Figure~\ref{alg:iterativesearch} and is fairly straightforward. It starts with the default value for each configuration parameter (Line 1). It then iterates over the parameters and for each parameter it explores a range of values from low to high, varying it with a minimum step size (Lines 2--6). It runs the query with the chosen parameter values and measures the metric (such as running time or utilization). It finds the value for which the metric is optimized and fixes the value of the parameter to that value before moving on the next parameter (lines 7--12). Finally, it outputs the set of good parameter values $V$ that are discovered in the process.
+The overall method is listed in Algorithm~\ref{alg:iterativesearch} and is fairly straightforward. It starts with the default value for each configuration parameter (Line 1). It then iterates over the parameters and for each parameter it explores a range of values from low to high, varying it with a minimum step size (Lines 2--6). It runs the query with the chosen parameter values and measures the metric (such as running time or utilization). It finds the value for which the metric is optimized and fixes the value of the parameter to that value before moving on the next parameter (lines 7--12). Finally, it outputs the set of good parameter values $V$ that are discovered in the process.
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 \renewcommand{\algorithmiccomment}[1]{// #1}
@@ -38,20 +38,20 @@ The overall algorithm is listed in Figure~\ref{alg:iterativesearch} and is fairl
 		\REQUIRE Set $\mathcal{P}$ = $\{p_1, p_2 \ldots p_n\}$ of parameters to be determined, the metric $m$ to be optimized, the query $Q$
 		\ENSURE The values for parameters in $\mathcal{P}$ that optimize $m$
 		\STATE Let $V$ = $\{v_1, v_2, \ldots v_n\}$ = $\{p_1^d, p_2^d, \ldots p_n^d\}$
-		\COMMENT {$p_i^l$, $p_i^d$ and $p_i^h$ denote the low value, default value and high value for parameter $p_i$}		
+		\COMMENT {$p_i^l$, $p_i^d$, $p_i^h$ and $p_i^s$ denote the low value, default value, high value and discrete step size for parameter $p_i$}		
 		\FOR {Param $p_i$ in $\mathcal{P}$}
-			\STATE Reset $m_{best}$
-			\FOR {Value $v$ from $p_i^l$ to $p_i^h$ in steps of $p_i^s$}
+			\STATE $m_{best} \gets null$
+			\FOR {Value $v$ from $p_i^l$ to $p_i^h$ in steps of $p_i^s$} 
 				\STATE Replace $v_i$ by $v$ in $V$
 				\STATE Run $Q$ with parameter setting $V$ and measure the metric $m$
-				\IF {$m$ is better than $m_{best}$}
-					\STATE $m_{best} = m$
-					\STATE $v_{best} = v$
+				\IF {$m_{best}$ is $null$ or $m$ is better than $m_{best}$}
+					\STATE $m_{best} \gets m$
+					\STATE $v_{best} \gets v$
 				\ENDIF
 			\ENDFOR
 			\STATE Replace $v_i$ by $v_{best}$ in $V$ \COMMENT{Best value for parameter $p_i$ is found and used in further search}			
 		\ENDFOR
-		\RETURN Output $V$
+		\RETURN $V$
     \end{algorithmic}
 \end{algorithm}
   

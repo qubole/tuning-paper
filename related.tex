@@ -10,7 +10,7 @@ critical configuration parameters\cite{DBLP:conf/icde/DebnathLM08}. All these te
 are based on using the optimizer cost model to simulate database behavior. The disadvantage is
 that the cost model may not model the effects of all important parameters.
 
-Ituned\cite{Duan:2009:TDC:1687627.1687767} is one of the first attempts to holistically 
+iTuned\cite{Duan:2009:TDC:1687627.1687767} is one of the first attempts to holistically 
 tune configuration parameters in modern database systems. iTuned consists of a planner
 which plans experiments and an executor that run experiments to choose the best parameters
 and the best values for a specific workload. iTuned is also a good example of a system that
@@ -22,7 +22,7 @@ in choosing configuration parameters automatically. The developers of these syst
 engines parameters, documented them and encouraged users to change them based on their workload.
 The main motivation was that the type of workloads and data processed on these systems were varied
 and the default values were suboptimal. It was assumed that the administrators have to manipulate
-parameters for a successfuly installation. Similar to tools in database systems, there are two schools
+parameters for a successful installation. Similar to tools in database systems, there are two schools
 of techniques - model based and execution based.
 
 Starfish\cite{herodotou2011starfish} was one of the first to model hadoop performance. Starfish 
@@ -45,7 +45,7 @@ In the online phase, Aroma trains a SVM which makes
 accurate and fast prediction of a job's performance for various
 configuration parameters and input data sizes. The optimization function in Aroma considers
 the machine type, number of machines and unit cost of the machine types with a constraint on
-run time of the query. Our approach uses a mathematical model instead of statistical or machine learning approaches. 
+run time of the query. Our approach uses a rule based mathematical model instead of statistical or machine learning approaches. 
  
 CherryPick\cite{Li:2014:MMO:2600212.2600229} and Sandeep Kumar et al.\cite{KumarPLPGB16} represent an alternate school of thought.
 Mathematical or statistical models for complex data engines is hard to build. Moreover maintenance of these models 
