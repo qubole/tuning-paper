@@ -22,8 +22,7 @@ in choosing configuration parameters automatically. The developers of these syst
 engines parameters, documented them and encouraged users to change them based on their workload.
 The main motivation was that the type of workloads and data processed on these systems were varied
 and the default values were suboptimal. It was assumed that the administrators have to manipulate
-parameters for a successful installation. Similar to tools in database systems, there are two schools
-of techniques - model based and execution based.
+parameters for a successful installation. Similar to tools in database systems, there are two possible approaches - model based and execution based.
 
 Starfish\cite{herodotou2011starfish} was one of the first to model hadoop performance. Starfish 
 consists of a \textit{profiler}, \textit{what-if} engine and a \textit{cost-based model}\cite{herodotou2011profiling}. 
@@ -50,7 +49,7 @@ run time of the query. Our approach uses a rule based mathematical model instead
 CherryPick\cite{Li:2014:MMO:2600212.2600229} and Sandeep Kumar et al.\cite{KumarPLPGB16} represent an alternate school of thought.
 Mathematical or statistical models for complex data engines is hard to build. Moreover maintenance of these models 
 is also hard as these data engines evolve. In this approach, experiments
-with alternate values of configuration parameters are are executed instead of simulated in a 
+with alternate values of configuration parameters are executed instead of simulated in a 
 statistical or mathematical model. The obvious disadvantage is that experiments cost money and the main 
 goal of these approaches is to make every experiment count. In \cite{KumarPLPGB16}, the authors use SPSA and Bayesian Optimization in \cite{Li:2014:MMO:2600212.2600229} 
 to choose an optimal set of experiments to find the best values for a pre-determined set of configuration parameters.
