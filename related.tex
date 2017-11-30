@@ -35,13 +35,13 @@ and recursive random search (RSS) for tuning the parameters for a Hadoop job. Th
 Starfish were extended with a new component - \textit{Elastisizer}\cite{Herodotou:2011:NOS:2038916.2038934}
 - to automatically size clusters on cloud platforms. 
 
-Compared to Starfish which is applicable to all workloads, our approach differs in focussing on SQL workloads only. The focus on 
+Compared to Starfish which is applicable to all types of workloads on a MapReduce Engine, our approach differs in focussing on SQL workloads only. The focus on 
 SQL workloads reduces the number of metrics required in profiler phase as well as the number of configuration parameters in the what-if engine.
-This approach has very practical benefits. An approach like Starfish has to consider every engine like Apache Spark, Apache Impala and PrestoDb separately
-as the internal architectures are very different. By simplifying the model to few common characteristics of all SQL engines, our approach can be extended
+This approach has very practical benefits. An approach like Starfish has to consider every engine like Apache Hive, Apache Spark, Apache Impala and PrestoDb separately
+as the internal architectures are very different. By simplifying the model to a few common characteristics of all SQL engines, our approach can be extended
 to other SQL engines much more easily. For example, in this paper we provide models for both Apache Hive and Apache Spark. Moreover these projects move 
 fast and the internal architectures change often in every release. The chances of requiring changes is lesser if the model is based on few parameters important for SQL workloads.
-The disadvantage of our approach is that it is not applicable to all workloads. 
+The disadvantage of our approach is that it is not applicable to all types of workloads. 
 
 There are multiple approaches \cite{wu2013self} \cite{lama2012aroma} that use machine learning techniques
 to cluster jobs based on their profiles. Based on the profile, the most optimal cluster configuration is

@@ -15,11 +15,11 @@ In the first set of experiments, we varied the partition size of the mapper task
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{fig/varysplitsize.png}
 	%\vspace*{-15pt}
-	\caption{Varying split size}
+	\caption{Varying split size \protect\footnotemark[1]}
 	\label{fig:varysplitsize}
 \end{figure}
 
-
+\footnotetext[1]{Bars in chart are in the same order as that of legends}
 In the second set of experiments, we varied the partition sizes for the reducer tasks by varying the %$spark.sql.
 $shuffle.partitions$ parameter from 50 to 800. This varies the number of reducer partitions and correspondingly the amount of data processed by each reducer task. The original TPC DS queries have many filters on the input tables, due to which the mappers process lots of data and the reducers process very less data. The overall time is thus dominated by the mapper tasks. To make this experiment on the reducer parallelism meaningful, we modified the queries to remove all the filters. After this change, the reducer tasks become a significant part of the overall query and changes in reducer times reflect in the overall query times. Figure~\ref{fig:varyreducers} shows the variations in the cumulative time with the number of partitions. As before, the overall time for the query increases with parallelism, due to increased overheads. The increase is moderate, for e.g., the 16 times increase in parallelism leads to an average slowdown of 47\%. These experiments lead to the next insight:
 \begin{insight}
@@ -31,7 +31,7 @@ The increased overheads are due to managing a larger number of tasks and increas
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{fig/varyreducers.png}
 	%\vspace*{-15pt}
-	\caption{Varying reducer partitions}
+	\caption{Varying reducer partitions \protect\footnotemark[1]}
 	\label{fig:varyreducers}
 \end{figure}
 
@@ -58,7 +58,7 @@ Cloud platforms provide a variety of machines which differ in various characteri
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{fig/varymem.png}
 	%\vspace*{-15pt}
-	\caption{Varying memory per executor core}
+	\caption{Varying memory per executor core \protect\footnotemark[1]}
 	\label{fig:varymem}
 \end{figure}
 
@@ -81,6 +81,8 @@ For Spark engines, there is an additional parameter of cores per executor. Given
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{fig/varycore.png}
 	%\vspace*{-15pt}
-	\caption{Varying cores per executor}
+	\caption{Varying cores per executor \protect\footnotemark[1]}
 	\label{fig:varycore}
 \end{figure}
+
+\footnotetext[1]{Bars in chart are in the same order as that of legends}
