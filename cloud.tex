@@ -44,7 +44,7 @@ Cloud platforms provide a choice of different instance types, each of which may 
 	\begin{algorithmic}[1]
 		\footnotesize
 		\REQUIRE  $\mathcal{M}$ is the job metrics (defined in table \ref{table:job_metrics} ), $I_{old}$  is instance configuration (defined in Table \ref{table:inst_conf}) on which $\mathcal{M}$ is collected, $I_{new}$ is new instance configuration on which $\mathcal{M}$ needs to be optimized upon, $\mathcal{G}$ is the global parameters defined in Table \ref{table:global_params}
-		\ENSURE New Job parameter $\mathcal{P}_{new}$ (defined in table \ref{table:job_params}) that optimize the cumulative time of containers.
+		\ENSURE New Job parameter $\mathcal{P}_{new}$ (defined in table \ref{table:job_params}) that optimize the cumulative time of containers and predicted cumulative time of containers $\mathcal{T}$.
 		\STATE newMemPerCore $\gets I_{new}$[nodeMemory] $/ I_{new}$[vCpuPerNode]
 		\STATE $\mathcal{P}_{new}$[mapreduce.map.memory.mb] $\gets$ newMemPerCore
 		\STATE $\mathcal{P}_{new}$[mapreduce.map.reduce.mb] $\gets$ newMemPerCore
@@ -58,7 +58,10 @@ Cloud platforms provide a choice of different instance types, each of which may 
 		\STATE $\mathcal{P}_{new}$[splitSize] $\gets$ newSplitSize
 		\STATE newBPR $\gets$ ($\mathcal{M}$[reducerMemory] $\times$ $\mathcal{M}$[mapperInputBytes]) $/$ ($\mathcal{M}$[mapperOutputBytes] $\times$ $\mathcal{G}$[reducerFrac])  
 		\STATE $\mathcal{P}_{new}$[hive.exec.reducers.bytes.per.reducer] $\gets$ newBPR
-		\STATE \RETURN $\mathcal{P}_{new}$
+		\STATE predictedMapperTime $\gets$ $\mathcal{M}$[mapperTime] $\times$ ($\mathcal{M}$[mapperInputBytes] $/$ ($\mathcal{M}$[mapperInputBytes] + $\mathcal{M}$[spilledMapBytes])) $\times$ ($I_{old}$ [eCPU] $/$ $I_{new}$[eCPU])
+		\STATE predictedReducerTime $\gets$ $\mathcal{M}$[reducerTime] $\times$ ($\mathcal{M}$[mapperOutputBytes] $/$ ($\mathcal{M}$[mapperOutputBytes] + $\mathcal{M}$[spilledRedBytes])) $\times$ ($I_{old}$ [eCPU] $/$ $I_{new}$[eCPU])
+		\STATE $\mathcal{T}$ $\gets$ predictedMapperTime + predictedReducerTime
+		\STATE \RETURN $\mathcal{P}_{new}$, $\mathcal{T}$
 	\end{algorithmic}
 \end{algorithm}
 
@@ -90,8 +93,8 @@ Algorithm \textbf{fitJobSpark} defined in Algorithm \ref{jobfitspark} is similar
 \caption{\textbf{fitJobSpark}}\label{jobfitspark}
 \begin{algorithmic}[1]
 \footnotesize
-\REQUIRE  $\mathcal{S}$ is set of stage parameters (defined in table \ref{table:stage_params} ), $\mathcal{I}$ is new instance configuration on which Spark Job needs to be optimized upon, $\mathcal{G}$ is the global parameters defined in Table \ref{table:global_params}
-\ENSURE New Job parameter $\mathcal{P}_{new}$ (defined in table \ref{table:job_params}) that optimize the cumulative time of containers.
+\REQUIRE  $\mathcal{S}$ is set of stage parameters (defined in table \ref{table:stage_params} ), $\mathcal{I}$ is new instance configuration on which Spark Job needs to be optimized upon, $\mathcal{G}$ is the global parameters defined in Table \ref{table:global_params}, $\mathcal{T}$ is cumulative task time to execute job.
+\ENSURE New Job parameter $\mathcal{P}_{new}$ (defined in table \ref{table:job_params}) that optimize the cumulative time of containers and predicted cumulative time of containers $\mathcal{T}_{new}$.
 \STATE $\mathcal{P}_{new}$[spark.executor.cores] $\gets$ $\mathcal{I}$ [vCpuPerNode]
 \STATE $\mathcal{P}_{new}$[spark.executor.memory] $\gets$ $\mathcal{I}$[nodeMemory] $\times$ $\mathcal{G}$[nodeMemoryFrac]
 \STATE newMemPerCore $\gets$ ($\mathcal{I}$[nodeMemory] $\times$ $\mathcal{G}$[nodeMemoryFrac]) $/$ $\mathcal{I}$[vCpuPerNode]
@@ -104,7 +107,8 @@ Algorithm \textbf{fitJobSpark} defined in Algorithm \ref{jobfitspark} is similar
 \STATE $\mathcal{P}_{new}$[mapreduce.input.fileinputformat.split.maxsize] $\gets$ splitSize
 \STATE $\mathcal{P}_{new}$[mapreduce.input.fileinputformat.split.minsize] $\gets$ splitSize
 \STATE $\mathcal{P}_{new}$[spark.sql.shuffle.partition] $\gets$ shufflePartition
-\STATE \RETURN $\mathcal{P}_{new}$
+\STATE $\mathcal{T}_{new}$ $\gets$ $\mathcal{T}$ $\times$ ($I_{old}$ [eCPU] $/$ $I_{new}$[eCPU])
+\RETURN $\mathcal{P}_{new}$, $\mathcal{T}_{new}$
 \end{algorithmic}
 \end{algorithm}
 
