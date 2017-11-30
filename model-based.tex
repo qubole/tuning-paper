@@ -117,7 +117,7 @@ Algorithm \ref{alg:optres} optimizes cumulative resource utilization of a SQL qu
 %\end{algorithm}
 
 \subsection{Results}
-We evaluated the effectiveness of $OptResource$ method by running experiments on real workloads. The experiments were carried out for a HIVE on MR engine for a workload consisting of 4 real customer queries. 
+We evaluated the effectiveness of $OptResource$ method by running experiments on real workloads. The experiments were carried out for a HIVE on MR engine for a workload consisting of 4 real customer queries (Customer 2). 
 Figure \ref{fig:modelbasedresult} shows the benefit predicted by our model and the actual observed benefit for these queries. The results show that the algorithm leads to significant savings in the cumulative resource usage cost, ranging from 70\% for $q3$ to 90\% for $q2$. Further, the actual savings closely match the predicted savings indicating that the model is reasonably accurate.
 
 \begin{figure}[h]
@@ -127,7 +127,7 @@ Figure \ref{fig:modelbasedresult} shows the benefit predicted by our model and t
 	\label{fig:modelbasedresult}
 \end{figure}
 
-We also evaluated effectiveness of the same technique on SparkSQL. Algorithm for it is very similar to $OptResource$ and we are skipping it for brevity. We ran it on 3 real world SparkSQL customer queries. Figure \ref{fig:modelbasedresultspark} shows that the predicted percent reduction in cost matches that of actual reduction is cost observed with very high accuracy.
+We also evaluated effectiveness of the same technique on SparkSQL. Algorithm for it is very similar to $OptResource$ and we are skipping it for brevity. We ran it on 3 real world SparkSQL customer queries (Customer 3). Figure \ref{fig:modelbasedresultspark} shows that the predicted percent reduction in cost matches that of actual reduction is cost observed with very high accuracy.
 
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{chart_spark.png}
