@@ -7,8 +7,8 @@ Cloud platforms provide additional flexibility due to the elastic nature of the 
 
 \noindent\subsubsection*{Cloud elasticity}
  In the cloud, the physical resource for the cluster are not committed forever. Clusters can be spun up and shut down on demand. In the iterative and model based experiments till now, we have focused on the cumulative resource usage metric (Equation~\ref{eqn:totalresource}), which was mainly achieved by reducing the memory usage of the containers. 
-In practice, this saving in memory would be useful only if it could be gainfully used by some other task or job. However, for all the big data SQL engines, the memory used by all the task processes is the same. It is controlled by parameters at the query level (e.g. mapper memory, reducer memory, spark executor memory) and cannot be tuned per task.
-Further, each workload will use its own dynamic cluster in a cloud setting, which implies that other workloads cannot use the memory saved either. 
+In practice, this saving in memory would be useful only if it could be gainfully used by some other task or job. However, for all the big data SQL engines, the memory used by all the task processes is the same. It is controlled by parameters at the query level (e.g. mapper memory, reducer memory, spark executor memory)and cannot be tuned per task.
+Further, each workload will use its own dynamic cluster in a Cloud setting, which implies that other workloads cannot use the memory saved either. 
 
 Thus saving memory may not be very useful and should not be the main criterion. Let us look at memory allocation in further detail. In SQL-on-Hadoop systems, containers are allocated using Yarn, which allocates based on two dimensions - \textbf{memory} and \textbf{vcpu}. Each container is given 1 vcpu and some memory. If all the vcpus on a node are allocated and memory is still available, the extra memory cannot be used and is wasted. Conversely, if all memory is used up and extra vcpus are available, those extra vcpus are wasted since they cannot be allocated. 
 Figure \ref{fig:container_shape} illustrates the three scenarios:
@@ -18,9 +18,9 @@ Figure \ref{fig:container_shape} illustrates the three scenarios:
 	\item[$\bullet$] Memory/vCPU ratio of container is higher than that of instance; hence, CPU is wasted as extra CPU of instance is remaining unused after container allocation.
 \end{enumerate}
 \begin{figure*}[h]
-	\includegraphics[width=0.3\linewidth]{container_shape1.png} 
-	\includegraphics[width=0.3\linewidth]{container_shape2.png}
-	\includegraphics[width=0.3\linewidth]{container_shape3.png}
+	\includegraphics[width=0.32\linewidth]{container_shape1.png} 
+	\includegraphics[width=0.32\linewidth]{container_shape2.png}
+	\includegraphics[width=0.32\linewidth]{container_shape3.png}
 	%\vspace*{-15pt}
 	\caption{\textbf{(a)} No Resource is wasted \textbf{(b)} Memory is wasted \textbf{(c)} CPU is wasted}
 	\label{fig:container_shape}
@@ -43,7 +43,7 @@ Cloud platforms provide a choice of different instance types, each of which may 
 	\caption{\textbf{fitJobMR}}\label{jobfit}
 	\begin{algorithmic}[1]
 		\footnotesize
-		\REQUIRE  $\mathcal{M}$ is the job metrics (defined in table \ref{table:job_metrics}), $I_{old}$  is instance configuration (defined in Table \ref{table:inst_conf}) on which $\mathcal{M}$ is collected, $I_{new}$ is new instance configuration on which $\mathcal{M}$ needs to be optimized upon, $\mathcal{G}$ is the global parameters defined in Table \ref{table:global_params}
+		\REQUIRE  $\mathcal{M}$ is the job metrics (defined in table \ref{table:job_metrics} ), $I_{old}$  is instance configuration (defined in Table \ref{table:inst_conf}) on which $\mathcal{M}$ is collected, $I_{new}$ is new instance configuration on which $\mathcal{M}$ needs to be optimized upon, $\mathcal{G}$ is the global parameters defined in Table \ref{table:global_params}
 		\ENSURE New Job parameter $\mathcal{P}_{new}$ (defined in table \ref{table:job_params}) that optimize the cumulative time of containers and predicted cumulative time of containers $\mathcal{T}$.
 		\STATE newMemPerCore $\gets I_{new}$[nodeMemory] $/ I_{new}$[vCpuPerNode]
 		\STATE $\mathcal{P}_{new}$[mapreduce.map.memory.mb] $\gets$ newMemPerCore
@@ -65,9 +65,9 @@ Cloud platforms provide a choice of different instance types, each of which may 
 	\end{algorithmic}
 \end{algorithm}
 
-The algorithm consists of two parts -- \textbf{fitJobMR} (Algorithm~\ref{jobfit}) that finds the optimal parameters on a given instance type for MR Job and $optimizeCost$ (Algorithm~\ref{cost_optimize}) that searches across instance types to determine the best instance type to be used. 
+The algorithm consists of two parts -- \textbf{fitJobMR} (Algorithm\ref{jobfit}) that finds the optimal parameters on a given instance type for MR Job and $optimizeCost$ (Algorithm~\ref{cost_optimize}) that searches across instance types to determine the best instance type to be used. 
 
-Algorithm \textbf{fitJobMR} is analogous to $OptResource$, but also takes the instance type $I_{new}$ as input. Instead of choosing the smallest possible $splitSize$ like $OptResource$, it starts with fixing $mapperMemory$ and $reducerMemory$ based on the memory available per core in the instance type being considered (lines 2--3). Based on this, the $ioSort$ is computed (lines 4--8). This is followed by computing the $splitSize$, such that the output of that split partition fits in the $ioSort$ and does not cause any spill (lines 9--11). Similarly, the $bytesPerReducer$ is computed such that the amount of mapper output data processed by each reducer fits in the reducer buffer without causing spills (lines 12--13). The algorithm also computes the estimated cumulative time (lines 14--16), by accounting for the amount of data processed and the CPU power (eCPU).
+Algorithm \textbf{fitJobMR} is analogous to $OptResource$, but also takes the instance type $I_{new}$ as input. Instead of choosing the smallest possible $splitSize$ like $OptResource$, it starts with fixing $mapperMemory$ and $reducerMemory$ based on the memory available per core in the instance type being considered (lines 2--3). Based on this, the $ioSort$ is computed (lines 4--8). This is followed by computing the $splitSize$, such that the output of that split partition fits in the $ioSort$ and does not cause any spill (lines 9--11). Similarly, the $bytesPerReducer$ is computed such that the amount of mapper output data processed by each reducer fits in the reducer buffer without causing spills (lines 12--13). The algorithm also computes the estimated cumulative time. Note that this algorithm optimizes a single Map Reduce stage. But typically queries comprises of multiple Map Reduce stages. In which case, we consider only the most dominant stage in terms of cumulative execution time of containers and optimize it. In case, there are no clear dominant stage or multiple dominant stages, we are conservative to avoid spills i.e., smallest suggested split size and bytes per reducer across stages are chosen.
 
 Algorithm $optimizeCost$ searches for the best instance type. It iterates over all the available instance types and calls \textbf{fitJobMR} to find the best configuration and cumulative time for each type (line 2). It computes the dollar cost  of the query using the rental rate per core per unit time $r$ using Equation~\ref{eqn:totalcost} (line 3). The instance type leading to the least dollar cost and the configuration corresponding to that instance are finally output by the algorithm.
 
@@ -93,7 +93,7 @@ Algorithm \textbf{fitJobSpark} defined in Algorithm \ref{jobfitspark} is similar
 \caption{\textbf{fitJobSpark}}\label{jobfitspark}
 \begin{algorithmic}[1]
 \footnotesize
-\REQUIRE  $\mathcal{S}$ is set of stage parameters (defined in table \ref{table:stage_params}), $\mathcal{I}$ is new instance configuration on which Spark Job needs to be optimized upon, $\mathcal{G}$ is the global parameters defined in Table \ref{table:global_params}, $\mathcal{T}$ is cumulative task time to execute job.
+\REQUIRE  $\mathcal{S}$ is set of stage parameters (defined in table \ref{table:stage_params} ), $\mathcal{I}$ is new instance configuration on which Spark Job needs to be optimized upon, $\mathcal{G}$ is the global parameters defined in Table \ref{table:global_params}, $\mathcal{T}$ is cumulative task time to execute job.
 \ENSURE New Job parameter $\mathcal{P}_{new}$ (defined in table \ref{table:job_params}) that optimize the cumulative time of containers and predicted cumulative time of containers $\mathcal{T}_{new}$.
 \STATE $\mathcal{P}_{new}$[spark.executor.cores] $\gets$ $\mathcal{I}$ [vCpuPerNode]
 \STATE $\mathcal{P}_{new}$[spark.executor.memory] $\gets$ $\mathcal{I}$[nodeMemory] $\times$ $\mathcal{G}$[nodeMemoryFrac]
@@ -101,7 +101,7 @@ Algorithm \textbf{fitJobSpark} defined in Algorithm \ref{jobfitspark} is similar
 \STATE shuffleBuffer $\gets$ newMemPerCore $\times$ $\mathcal{G}$[shuffleBufferFrac]
 \STATE readBuffer $\gets$ newMemPerCore $\times$ $\mathcal{G}$[readBufferFrac]
 \FOR {\textbf{each} $s_{i}$ $\in$ $\mathcal{S}$}
-\STATE splitSize $\gets$ $min(s_{i}$[inputBytes] $/$  readBuffer, splitSize$)$ 
+\STATE splitSize $\gets$ $min($ $s_{i}$[inputBytes] $/$  readBuffer, splitSize$)$ 
 \STATE shufflePartiton $\gets$ $max($shuffleRead $/$ shuffleBuffer, shufflePartition$)$
 \ENDFOR
 \STATE $\mathcal{P}_{new}$[mapreduce.input.fileinputformat.split.maxsize] $\gets$ splitSize
@@ -134,13 +134,13 @@ Algorithm \textbf{fitJobSpark} defined in Algorithm \ref{jobfitspark} is similar
 
 \subsection{Results}
 
-We evaluated the new cost metric defined for cloud on a synthetic workload as well as the same SparkSQL customer queries (for Customer 3) considered in Figure ~\ref{fig:modelbasedresultspark}. 
+We evaluated the new cost metric defined for cloud on a synthetic workload as well as the same SparkSQL customer queries which were evaluated in Figure ~\ref{fig:modelbasedresultspark}. 
 
 \subsubsection*{Synthetic Workload}
 For the synthetic workload, we used the TPC DS dataset (scale 1000) and a subset of the queries. The experiments
 were run on a 4-node cluster on AWS with machine type r3.4xlarge running SparkSQL on an Apache Spark cluster. We chose this specific machine type as it is the 
 most popular machine type in Qubole Data Service. The cloud model suggested that it is cheaper to run these 
-queries on c3 family of machines. We re-ran the queries on a 4-node cluster with machine type c3.4xlarge. 
+queries on c3 family of machines. We reran the queries on a 4-node cluster with machine type c3.4xlarge. 
 Figure \ref{fig:syntheticcloudmodel} shows the reduction percent on absolute dollar cost of running a subset of the
 TPC DS queries. Dollar cost is determined by the cost of running a particular AWS instance for cumulative time of running query as defined in Section~\ref{sec:optmethod}.
 \begin{figure}[h]
@@ -151,7 +151,7 @@ TPC DS queries. Dollar cost is determined by the cost of running a particular AW
 \end{figure}
 
 \subsubsection*{Real Workloads}
-We ran these experiments on a similar cluster on AWS. Figure \ref{fig:modelbaseddollarresult} shows the reduction percent on absolute dollar cost of running 3 customer queries. 
+We ran our experiments on Amazon Web Services. Figure \ref{fig:modelbaseddollarresult} shows the reduction percent on absolute dollar cost of running 3 customer queries. 
 
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{ModelExp.png}
