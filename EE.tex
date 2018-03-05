@@ -1,4 +1,4 @@
-\documentclass[sigconf]{acmart}
+\documentclass[10pt, conference, compsocconf]{IEEEtran}
 
 \usepackage{listings}
 \usepackage{booktabs} % For formal tables
@@ -7,21 +7,10 @@
 \usepackage{enumitem}
 \usepackage{amsthm}
 \usepackage{multirow}
-\setcopyright{rightsretained}
-
-% DOI
-\acmDOI{10.475/123\_4}
-
-% ISBN
-\acmISBN{123-4567-24-567/08/06}
-
-%Conference
-\acmConference[SIGMOD 2018]{ACM SIGMOD conference}{June 2018}{Houston
-  , Texas USA} 
-\acmYear{2018}
-\copyrightyear{2017}
-
-\acmPrice{15.00}
+\usepackage{cite}
+\usepackage{graphicx}
+\graphicspath{{fig/}}
+\DeclareGraphicsExtensions{.jpeg,.png}
 
 \newtheorem{insight}{Insight}
 \newcommand{\eat}[1]{}
@@ -31,36 +20,24 @@
 \begin{document}
 \title{Automatic Tuning of SQL-On-Hadoop Engines on Cloud Platforms}
 
-\author{Prasad M Deshpande}
-\affiliation{%
-  \institution{Qubole India}
-  \city{Bengaluru}
-  \state{Karnataka}
-  \country{India}
+\author{
+	\IEEEauthorblockN{Prasad M. Deshpande}
+	\IEEEauthorblockA{Qubole India\\
+		Bengalure, Karnataka, India\\
+		prasadmd@acm.org}
+	\and
+	\IEEEauthorblockN{Amogh Margoor }
+	\IEEEauthorblockA{Qubole India\\
+		Bengalure, Karnataka, India\\
+		amoghm@qubole.com}
+	\and
+	\IEEEauthorblockN{Rajat Venkatesh}
+	\IEEEauthorblockA{Qubole India\\
+		Bengalure, Karnataka, India\\
+		rvenkatesh@qubole.com}
 }
-\email{prasadmd@acm.org}
 
-\author{Amogh Margoor}
-\affiliation{%
-  \institution{Qubole India}
-  \city{Bengaluru}
-  \state{Karnataka}
-  \country{India}
-}
-\email{amoghm@qubole.com}
-
-\author{Rajat Venkatesh}
-\affiliation{%
-  \institution{Qubole India}
-  \city{Bengaluru}
-  \state{Karnataka}
-  \country{India}
-}
-\email{rvenkatesh@qubole.com}
-
-% The default list of authors is too long for headers}
-\renewcommand{\shortauthors}{P. Deshpande et al.}
-
+\maketitle
 
 \begin{abstract}
 More and more companies are running Big Data workloads on cloud platforms. Configuration tuning of these data engines continues to be an essential but difficult undertaking. Cloud platforms further add to this complexity due to elasticity of compute resources and availability of different machine types. Data engineers have to choose the correct machine type as well as the number of machines along with the other configuration options.
@@ -69,44 +46,16 @@ In this paper, we address the problem of automatically determining good configur
 
 We show that very simple models of SQL Data Engines can provide very good recommendations compared to the default configuration. In fact, we found that these were often better than those chosen by experts on real customer workloads.  The principles behind our model based approach are generic and can be adopted for any big data engine. 
 \end{abstract}
-\eat{
-\begin{CCSXML}
-<ccs2012>
-<concept>
-<concept_id>10002951.10002952.10003190.10003195.10010837</concept_id>
-<concept_desc>Information systems~MapReduce-based systems</concept_desc>
-<concept_significance>500</concept_significance>
-</concept>
-<concept>
-<concept_id>10002951.10002952.10003190.10003195.10010838</concept_id>
-<concept_desc>Information systems~Relational parallel and distributed DBMSs</concept_desc>
-<concept_significance>500</concept_significance>
-</concept>
-<concept>
-<concept_id>10002951.10002952.10003212.10003216</concept_id>
-<concept_desc>Information systems~Autonomous database administration</concept_desc>
-<concept_significance>500</concept_significance>
-</concept>
-</ccs2012>
-\end{CCSXML}
-}
-\ccsdesc[500]{Information systems~MapReduce-based systems}
-\ccsdesc[500]{Information systems~Relational parallel and distributed DBMSs}
-\ccsdesc[500]{Information systems~Autonomous database administration}
-\keywords{Big Data, SQL, Hadoop, Hive, Presto, Spark, Automatic Performance tuning}
 
-
-\maketitle
-
-\input{intro}
-\input{related}
-\input{optfunc}
-\input{iterative}
-\input{insights}
-\input{model-based}
-\input{cloud}
-\input{conclusions}
-\bibliographystyle{ACM-Reference-Format}
+ \input{intro}
+ \input{related}
+ \input{optfunc}
+ \input{iterative}
+ \input{insights}
+ \input{model-based}
+ \input{cloud}
+ \input{conclusions}
+\bibliographystyle{IEEETran}
 \bibliography{sample-bibliography} 
 
 \end{document}

@@ -1,16 +1,16 @@
 \section{Related Work}
 \label{sec:relatedwork}
 Most relational databases have auto-tuning tools for physical database design. 
-Self-tuning Database Systems: A Decade of Progress\cite{Chaudhuri:2007:SDS:1325851.1325856}
+Self-tuning Database Systems: A Decade of Progress~\cite{Chaudhuri}
  has a good survey of research and tools in this area. Most database systems have 
 not put similar attention to determine best values of configuration parameters 
 based on workloads. Traditionally effort has focused on specific class of parameters 
-(e.g.\cite{Storm:2006:ASM:1182635.1164220} ) or on ranking
-critical configuration parameters\cite{DBLP:conf/icde/DebnathLM08}. All these techniques
+(e.g.\cite{Storm} ) or on ranking
+critical configuration parameters\cite{DebnathLM08}. All these techniques
 are based on using the optimizer cost model to simulate database behavior. The disadvantage is
 that the cost model may not model the effects of all important parameters.
 
-iTuned\cite{Duan:2009:TDC:1687627.1687767} is one of the first attempts to holistically 
+iTuned\cite{Duan} is one of the first attempts to holistically 
 tune configuration parameters in modern database systems. iTuned consists of a planner
 which plans experiments and an executor that run experiments to choose the best parameters
 and the best values for a specific workload. iTuned is also a good example of a system that
@@ -24,7 +24,7 @@ The main motivation was that the type of workloads and data processed on these s
 and the default values were suboptimal. It was assumed that the administrators have to manipulate
 parameters for a successful installation. Similar to tools in database systems, there are two possible approaches - model based and execution based.
 
-Starfish\cite{herodotou2011starfish} was one of the first to model hadoop performance. Starfish 
+Starfish \cite{herodotou2011starfish} was one of the first to model hadoop performance. Starfish 
 consists of a \textit{profiler}, \textit{what-if} engine and a \textit{cost-based model}\cite{herodotou2011profiling}. 
 The \textit{profiler} collects statistics from previous runs of a customer workload 
 such as bytes flowing through the system and time taken using dynamic instrumentation. The profiler provides a view of timings (wall clock timings of various phases),
@@ -32,7 +32,7 @@ data flow (bytes input/output in every phase) and resources (CPU, networking, me
 the behavior of the Map Reduce engine and can predict the effect of changing the value 
 of a configuration parameter. The \textit{cost based optimizer} uses the \textit{what-if engine}
 and recursive random search (RSS) for tuning the parameters for a Hadoop job. The components of
-Starfish were extended with a new component - \textit{Elastisizer}\cite{Herodotou:2011:NOS:2038916.2038934}
+Starfish were extended with a new component - \textit{Elastisizer}\cite{HerodotouNoOne}
 - to automatically size clusters on cloud platforms. 
 
 Compared to Starfish which is applicable to all types of workloads on a MapReduce Engine, our approach differs in focussing on SQL workloads only. The focus on 
@@ -54,12 +54,12 @@ configuration parameters and input data sizes. The optimization function in Arom
 the machine type, number of machines and unit cost of the machine types with a constraint on
 run time of the query. Our approach uses a rule based mathematical model instead of statistical or machine learning approaches. 
  
-CherryPick\cite{Li:2014:MMO:2600212.2600229} and Sandeep Kumar et al.\cite{KumarPLPGB16} represent an alternate school of thought.
+CherryPick\cite{LiMinZeng} and Sandeep Kumar et al.\cite{KumarPLPGB16} represent an alternate school of thought.
 Mathematical or statistical models for complex data engines is hard to build. Moreover maintenance of these models 
 is also hard as these data engines evolve. In this approach, experiments
 with alternate values of configuration parameters are executed instead of simulated in a 
 statistical or mathematical model. The obvious disadvantage is that experiments cost money and the main 
-goal of these approaches is to make every experiment count. In \cite{KumarPLPGB16}, the authors use SPSA and Bayesian Optimization in \cite{Li:2014:MMO:2600212.2600229} 
+goal of these approaches is to make every experiment count. In \cite{KumarPLPGB16}, the authors use SPSA and Bayesian Optimization in \cite{LiMinZeng} 
 to choose an optimal set of experiments to find the best values for a pre-determined set of configuration parameters.
 In Section~\ref{section:iter} we tried an iterative execution approach and found it to be impractical in terms of dollar cost. 
 At the same time it is hard to manage detailed models of complex engine and therefore
