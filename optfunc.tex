@@ -1,9 +1,9 @@
 \section{Optimization Methodology}
 \label{sec:optmethod}
-We now present the optimization functions, parameters and assumptions to tune SQL-on-Hadoop data engines. Even though the model is specific to run time features of SQL-on-Hadoop engines, the principles can be translated to other engines. 
+We now present the optimization functions, parameters and assumptions to tune SQL-on-Hadoop data engines running on Hadoop2 Yarn Containers. \eat{Even though the model is specific to run time features of SQL-on-Hadoop engines, the principles can be translated to other engines. }
 
-\subsection{Optimization Function}
-The optimization function should consider both cost and performance of a workload. In this section, we develop a metric to capture cost and performance of SQL-on-Hadoop engines running on Hadoop2 Yarn Containers. Hadoop divides machines into containers and each container is assigned a fixed amount of memory and CPUs. Workloads are submitted to Hadoop by Hive or Spark as a set of tasks which are scheduled by Hadoop on containers. The first metric we considered measures the total resource utilization. Since memory and CPU are both important resources, the cumulative resource utilization is given by:
+\subsection{Optimization Functions}
+The optimization function should consider both cost and performance of a workload. \eat{In this section, we develop a metric to capture cost and performance of SQL-on-Hadoop engines running on Hadoop2 Yarn Containers.} Hadoop divides machines into containers and each container is assigned a fixed amount of memory and CPUs. Workloads are submitted to Hadoop by Hive or Spark as a set of tasks which are scheduled by Hadoop on containers. The first metric we consider measures the total resource utilization. Since memory and CPU are both important resources, the cumulative resource utilization is given by:
 \begin{equation}
 \label{eqn:totalresource}
 \mathcal{R} = \sum_{i=1}^{n} t_i \times m_i
@@ -24,25 +24,27 @@ Different machine types on a cloud platform can have different monetary costs de
 
 
 \begin{table*}
-	\begin{tabular}{ |l|l|l| } 
-		\hline
-		Parameter & Hive on MR & Spark \\ 
-		\hline
-		Mapper memory & mapreduce.map.memory.mb & \multirow{2}{*}{spark.executor.memory} \\
-		Reducer memory & mapreduce.reduce.memory.mb & \\
-		\hline
-		\multirow{2}{*}{Mapper parallelism} & \multicolumn{2}{|c|}{mapreduce.input.fileinputformat.split.maxsize} \\
-		& \multicolumn{2}{|c|}{mapreduce.input.fileinputformat.split.minsize} \\
-		\hline
-		Reducer parallelism & hive.exec.reducers.bytes.per.reducer & spark.sql.shuffle.partitions \\
-		\hline
-		Executor cores & Not applicable & spark.executor.cores \\
-		\hline
-		Mapper Buffer & mapreduce.task.io.sort.mb & Not applicable \\
-		\hline
-	\end{tabular}
+	\begin{center}
+		\begin{tabular}{ |l|l|l| } 
+			\hline
+			Parameter & Hive on MR & Spark \\ 
+			\hline
+			Mapper memory & mapreduce.map.memory.mb & \multirow{2}{*}{spark.executor.memory} \\
+			Reducer memory & mapreduce.reduce.memory.mb & \\
+			\hline
+			\multirow{2}{*}{Mapper parallelism} & \multicolumn{2}{|c|}{mapreduce.input.fileinputformat.split.maxsize} \\
+			& \multicolumn{2}{|c|}{mapreduce.input.fileinputformat.split.minsize} \\
+			\hline
+			Reducer parallelism & hive.exec.reducers.bytes.per.reducer & spark.sql.shuffle.partitions \\
+			\hline
+			Executor cores & Not applicable & spark.executor.cores \\
+			\hline
+			Mapper Buffer & mapreduce.task.io.sort.mb & Not applicable \\
+			\hline
+		\end{tabular}
+	\end{center}
 	\caption{Parameters of the Job to be optimized}
-	\label{table:job_params}
+	\label{table:job_params}	
 \end{table*}
 
 

@@ -18,23 +18,27 @@ ran experiments on user workloads and queries compared to using models to simula
 Our preferred approach focuses on SQL-on-Hadoop engine and uses models to eliminate cost of experiments.
  
 The popularity of Apache Hadoop ecosystem (Apache Hive, Apache Spark etc) increased interest
-in choosing configuration parameters automatically. The developers of these systems exposed
+in choosing configuration parameters automatically. 
+\eat{
+	The developers of these systems exposed
 engines parameters, documented them and encouraged users to change them based on their workload.
 The main motivation was that the type of workloads and data processed on these systems were varied
 and the default values were suboptimal. It was assumed that the administrators have to manipulate
 parameters for a successful installation. Similar to tools in database systems, there are two possible approaches - model based and execution based.
-
+}
 Starfish \cite{herodotou2011starfish} was one of the first to model hadoop performance. Starfish 
 consists of a \textit{profiler}, \textit{what-if} engine and a \textit{cost-based model}\cite{herodotou2011profiling}. 
+\eat{
 The \textit{profiler} collects statistics from previous runs of a customer workload 
 such as bytes flowing through the system and time taken using dynamic instrumentation. The profiler provides a view of timings (wall clock timings of various phases),
 data flow (bytes input/output in every phase) and resources (CPU, networking, memory) used. The \textit{what-if engine} simulates 
 the behavior of the Map Reduce engine and can predict the effect of changing the value 
-of a configuration parameter. The \textit{cost based optimizer} uses the \textit{what-if engine}
+of a configuration parameter.}
+The \textit{profiler} collects statistics from previous runs of a customer workload.
+ The \textit{cost based optimizer} uses the \textit{what-if engine}
 and recursive random search (RSS) for tuning the parameters for a Hadoop job. The components of
 Starfish were extended with a new component - \textit{Elastisizer}\cite{HerodotouNoOne}
 - to automatically size clusters on cloud platforms. 
-
 Compared to Starfish which is applicable to all types of workloads on a MapReduce Engine, our approach differs in focussing on SQL workloads only. The focus on 
 SQL workloads reduces the number of metrics required in profiler phase as well as the number of configuration parameters in the what-if engine.
 This approach has very practical benefits. An approach like Starfish has to consider every engine like Apache Hive, Apache Spark, Apache Impala and PrestoDb separately
