@@ -119,7 +119,7 @@ Algorithm \ref{alg:optres} optimizes cumulative resource utilization of a SQL qu
 
 \subsection{Results}
 We evaluated the effectiveness of $OptResource$ method by running experiments on real workloads. The experiments were carried out for a HIVE on MR engine for a workload consisting of 4 real customer queries (Customer 2). 
-Figure \ref{fig:modelbasedresult} shows the benefit predicted by our model and the actual observed benefit for these queries. The results show that the algorithm leads to significant savings in the cumulative resource usage cost, ranging from 70\% for $q3$ to 90\% for $q2$. Further, the actual savings closely match the predicted savings indicating that the model is reasonably accurate.
+Figure \ref{fig:modelbasedresult} shows the benefit predicted by our model and the actual observed benefit for these queries. As noted before the improvements are compared to configuration chosen by experts at the customer. The results show that the algorithm leads to significant savings in the cumulative resource usage cost, ranging from 70\% for $q3$ to 90\% for $q2$. Further, the actual savings closely match the predicted savings indicating that the model is reasonably accurate.
 
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{chart.png}
