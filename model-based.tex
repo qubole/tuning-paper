@@ -104,7 +104,7 @@ Algorithm \ref{alg:optres} optimizes cumulative resource utilization of a SQL qu
 		\STATE $numMappers \gets mapperInputBytes/\mathcal{P}_{new}.splitsize$
 		\STATE $numReducers \gets mapperInputBytes/\mathcal{P}_{new}.bytesPerReducer$
 		\STATE $expectedResUsage \gets numMappers \times minMapTime \times \mathcal{P}_{new}.mapperMemory  + numReducers \times minRedTime \times \mathcal{P}_{new}.reducerMemory$
-		\STATE \RETURN $\mathcal{P}_{new}, expectedResUsage$
+		\RETURN $\mathcal{P}_{new}, expectedResUsage$
 	\end{algorithmic}
 \end{algorithm}
 
