@@ -69,7 +69,10 @@ The inputs to the algorithms are:
  maxIOSort & Maximum value for \textit{mapreduce.task.io.sort.mb} & 2047 \\
  reducerFrac & Fraction of Reducer memory to be used as buffer & 0.4 \\ 
  minMapTime & Minimum time that a mapper should take & 60s \\
- minRedTime & Minimum time that a reducer should take & 60s \\ 
+ minRedTime & Minimum time that a reducer should take & 60s \\
+ nodeMemFrac & Fraction of Node memory for Jobs & 0.80 \\
+ shuffleBufferFrac & Memory Fraction for shuffle & 0.25 \\
+ readBufferFrac & Memory Fraction for reading & 0.25 \\
  \hline
 \end{tabular}
 \end{center}

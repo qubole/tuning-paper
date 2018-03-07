@@ -107,8 +107,8 @@ Algorithm \textbf{fitJobSpark} defined in Algorithm \ref{jobfitspark} is similar
 \REQUIRE  $\mathcal{S}$ is set of stage parameters (defined in table \ref{table:stage_params}), $\mathcal{I}$ is new instance configuration on which Spark Job needs to be optimized upon, $\mathcal{G}$ is the global parameters defined in Table \ref{table:global_params}, $\mathcal{T}$ is cumulative task time to execute job.
 \ENSURE New Job parameter $\mathcal{P}_{new}$ (defined in table \ref{table:job_params}) that optimize the cumulative time of containers and predicted cumulative time of containers $\mathcal{T}_{new}$.
 \STATE $\mathcal{P}_{new}$[spark.executor.cores] $\gets$ $\mathcal{I}$ [vCpuPerNode]
-\STATE $\mathcal{P}_{new}$[spark.executor.memory] $\gets$ $\mathcal{I}$[nodeMemory] $\times$ $\mathcal{G}$[nodeMemoryFrac]
-\STATE newMemPerCore $\gets$ ($\mathcal{I}$[nodeMemory] $\times$ $\mathcal{G}$[nodeMemoryFrac]) $/$ $\mathcal{I}$[vCpuPerNode]
+\STATE $\mathcal{P}_{new}$[spark.executor.memory] $\gets$ $\mathcal{I}$[nodeMemory] $\times$ $\mathcal{G}$[nodeMemFrac]
+\STATE newMemPerCore $\gets$ ($\mathcal{I}$[nodeMemory] $\times$ $\mathcal{G}$[nodeMemFrac]) $/$ $\mathcal{I}$[vCpuPerNode]
 \STATE shuffleBuffer $\gets$ newMemPerCore $\times$ $\mathcal{G}$[shuffleBufferFrac]
 \STATE readBuffer $\gets$ newMemPerCore $\times$ $\mathcal{G}$[readBufferFrac]
 \FOR {\textbf{each} $s_{i}$ $\in$ $\mathcal{S}$}
