@@ -40,14 +40,14 @@
 \maketitle
 
 \begin{abstract}
-More and more companies are running Big Data workloads on cloud platforms. Configuration tuning of these data engines continues to be an essential but difficult undertaking. Cloud platforms further add to this complexity due to elasticity of compute resources and availability of different machine types. Data engineers have to choose the correct machine type as well as the number of machines along with the other configuration options.
+More and more companies are running Big Data workloads on cloud platforms. Configuration tuning of these data engines continues to be an essential but difficult undertaking. Cloud platforms further add to this complexity due to elasticity of compute resources and availability of different machine types. Data engineers have to choose the machine type and the cluster size in addition to the other configuration options.
 
 In this paper, we address the problem of automatically determining good configuration parameters for SQL workloads on SQL-On-Hadoop Engines like Hive and Spark, with the goal of optimizing resource usage and cost. We chose to focus on SQL workloads because SQL or SQL-like languages continue to be the most popular choice of ETL engineers and analysts. We propose a model based approach that relies on simple rules and insights into SQL Data Engine behavior and evaluate its effectiveness on both synthetic and real workloads.
 
 \eat{
 We present two alternatives -- an iterative method based on repeatedly executing queries with different configuration parameters and a model based method relying on simple rules and insights. We studied the effectiveness and practical usefulness of these methods on both synthetic and real workloads.
 }
-We show that very simple models \eat{of SQL Data Engines} can provide very good recommendations compared to the default configuration. In fact, we found that these were often better than those chosen by experts on real customer workloads. A somewhat surprising result is that more expensive machines with a larger RAM often do not lead to better outcomes in terms of overall query cost and execution times. The principles behind our model based approach are generic and can be adopted for any big data engine. 
+We show that very simple models \eat{of SQL Data Engines} can provide very good recommendations compared to the default configuration. In fact, we found that these were often better than those chosen by experts on real customer workloads. A somewhat surprising result is that more expensive machines with larger RAMs often do not lead to significant improvements in query execution times. \eat{better outcomes in terms of overall query cost and execution times.} The principles behind our model based approach are generic and can be adopted for any big data engine. 
 \end{abstract}
 
  \input{intro}
