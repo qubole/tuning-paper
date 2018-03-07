@@ -26,12 +26,11 @@ The \textit{profiler} collects statistics from previous runs of a customer workl
 such as bytes flowing through the system and time taken using dynamic instrumentation. The profiler provides a view of timings (wall clock timings of various phases),
 data flow (bytes input/output in every phase) and resources (CPU, networking, memory) used. The \textit{what-if engine} simulates 
 the behavior of the Map Reduce engine and can predict the effect of changing the value 
-of a configuration parameter.}
+of a configuration parameter.
 The \textit{profiler} collects statistics from previous runs of a customer workload.
  The \textit{cost based optimizer} uses the \textit{what-if engine}
-and recursive random search (RSS) for tuning the parameters for a Hadoop job. The components of
-Starfish were extended with a new component - \textit{Elastisizer}\cite{HerodotouNoOne}
-- to automatically size clusters on cloud platforms. 
+and recursive random search (RSS) for tuning the parameters for a Hadoop job.} 
+Starfish was extended to automatically size clusters on cloud platforms using \textit{Elastisizer}\cite{HerodotouNoOne}.
 Compared to Starfish which is applicable to all types of workloads on a MapReduce Engine, our approach differs in focussing on SQL workloads only. The focus on 
 SQL workloads reduces the number of metrics required in profiler phase as well as the number of configuration parameters in the what-if engine.
 This approach has very practical benefits. An approach like Starfish has to consider every engine like Apache Hive, Apache Spark, Apache Impala and PrestoDb separately
@@ -42,25 +41,25 @@ The disadvantage of our approach is that it is not applicable to all types of wo
 
 
 There are multiple approaches \cite{wu2013self} \cite{lama2012aroma} that use machine learning techniques
-to cluster jobs based on their profiles and choose the most optimal cluster configuration. Aroma \cite{lama2012aroma} optimizes resource allocation and cost of jobs. \eat{In
+to cluster jobs based on their profiles and choose the most optimal cluster configuration. \eat{Aroma \cite{lama2012aroma} optimizes resource allocation and cost of jobs. \eat{In
 the offline phase, using a training set, the jobs are clustered
 (using variants of k-means) according to their respective signatures.
 In the online phase, Aroma trains a SVM which makes
 accurate and fast prediction of a job's performance for various
 configuration parameters and input data sizes.} The optimization function in Aroma considers
 the machine type, number of machines and unit cost of the machine types with a constraint on
-run time of the query. Our approach uses a rule based mathematical model instead of statistical or machine learning approaches. 
+run time of the query. Our approach uses a rule based mathematical model instead of statistical or machine learning approaches. }
 
 An alternative school of thought is the iterative method, in which experiments
 with alternate values of configuration parameters are executed instead of being simulated in a statistical or mathematical model. They don't need to rely on accurate models for complex data engines which are hard to build. The obvious disadvantage is that experiments cost money and the main 
 goal of these approaches is to make every experiment count.
 iTuned\cite{Duan} is one of the first attempts in this direction to holistically 
-tune configuration parameters in modern database systems. It consists of a planner
+tune configuration parameters in modern database systems. \eat{It consists of a planner
 which plans experiments and an executor that run experiments to choose the best parameters
-and the best values for a specific workload. \eat{iTuned is also a good example of a system that
+and the best values for a specific workload. iTuned is also a good example of a system that
 	ran experiments on user workloads and queries compared to using models to simulate data engines.}
-CherryPick\cite{LiMinZeng} and Sandeep Kumar et al.\cite{KumarPLPGB16} apply this approach to Hadoop based systems.  SPSA is used in \cite{KumarPLPGB16}, whereas Bayesian Optimization is used in \cite{LiMinZeng} 
-to choose an optimal set of experiments to find the best values for a pre-determined set of configuration parameters.
+CherryPick\cite{LiMinZeng} and Sandeep Kumar et al.\cite{KumarPLPGB16} apply this approach to Hadoop based systems.\eat{SPSA is used in \cite{KumarPLPGB16}, whereas Bayesian Optimization is used in \cite{LiMinZeng} 
+to choose an optimal set of experiments to find the best values for a pre-determined set of configuration parameters.}
 We initially tried an iterative execution approach and found it to be impractical in terms of dollar cost\cite{fullpaper}. At the same time it is hard to manage detailed models of complex engine. Thus, 
 our preferred approach focuses on SQL-on-Hadoop engines and uses models to eliminate cost of experiments.
 

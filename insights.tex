@@ -46,7 +46,6 @@ In the first set of experiments, we varied the partition size of the mapper task
 \end{figure}
 }
 
-\footnotetext[1]{Bars in chart are in the same order as that of legends}
 Next, we varied the partition sizes for the reducer tasks by varying the %$spark.sql. 
 reducer parallelism ($shuffle.partitions$) parameter from 50 to 800. The original TPC DS queries have many filters on the input tables, due to which the reducers process very less data and don't contribute much to the cumulative query time. To make this experiment on the reducer parallelism meaningful, we modified the queries to remove all the filters, so that data processed by the reducers becomes significant. Figure~\ref{fig:varyreducers} shows the variations in the cumulative time with the number of partitions. As before, the overall time for the query increases with parallelism, due to increased overheads. The increase is moderate, for e.g., the 16 times increase in parallelism leads to an average slowdown of 47\%. These experiments lead to the next insight:
 
@@ -83,6 +82,7 @@ Spills can be avoided by providing adequate memory to each task or by making mor
 	\label{fig:q46}
 \end{figure}
 
+\footnotetext[1]{Bars in chart are in the same order as that of legends}
 
 \noindent\subsubsection*{Memory and instance type}
 %We saw that the memory of each container should be set according the Memory/vCPU ratio of the machine. 

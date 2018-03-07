@@ -3,23 +3,23 @@
 We now present the optimization functions, parameters and assumptions to tune SQL-on-Hadoop data engines running on Hadoop2 Yarn Containers. \eat{Even though the model is specific to run time features of SQL-on-Hadoop engines, the principles can be translated to other engines. }
 
 \subsection{Optimization Functions}
-The optimization function should consider both cost and performance of a workload. \eat{In this section, we develop a metric to capture cost and performance of SQL-on-Hadoop engines running on Hadoop2 Yarn Containers.} Hadoop divides machines into containers and each container is assigned a fixed amount of memory and CPUs. Workloads are submitted to Hadoop by Hive or Spark as a set of tasks which are scheduled by Hadoop on containers. The first metric we consider measures the total resource utilization. Since memory and CPU are both important resources, the cumulative resource utilization is given by:
+\eat{The optimization function should consider both cost and performance of a workload. In this section, we develop a metric to capture cost and performance of SQL-on-Hadoop engines running on Hadoop2 Yarn Containers.} Hadoop divides machines into containers and each container is assigned a fixed amount of memory and one CPU. \eat{Workloads are submitted to Hadoop by Hive or Spark as a set of tasks which are scheduled by Hadoop on containers. The first metric we consider measures the total resource utilization. Since memory and CPU are both important resources,} The cumulative resource utilization is given by:
 \begin{equation}
 \label{eqn:totalresource}
 \mathcal{R} = \sum_{i=1}^{n} t_i \times m_i
 \end{equation}
-In the above equation, $n$ is the number of tasks, $t_i$ is the execution time for task $i$ and $m_i$ is the memory allocated to the container on which the task is scheduled. The time factor in the equation tracks the performance of the query. In a cloud deployment, the dollar cost of running the workload becomes an important metric. If the workload under consideration is the only one running on the cluster, then the cumulative time that the workload is scheduled on all the containers is a good proxy for the cost of the query, as given by:
+In the above equation, $n$ is the number of tasks, $t_i$ is the execution time for task $i$ and $m_i$ is the memory allocated to the container on which the task is scheduled. \eat{The time factor in the equation tracks the performance of the query.} In a cloud deployment, the dollar cost of running the workload becomes an important metric. \eat{If the workload under consideration is the only one running on the cluster, then the cumulative time that the workload is scheduled on all the containers is a good proxy for the cost of the query, as given by:} The cumulative CPU time of the query is a good proxy for the cost of the query, as given by:
 \begin{equation}
 \label{eqn:totaltime}
 \mathcal{T} = \sum_{i=1}^{n} t_i
 \end{equation}
-Different machine types on a cloud platform can have different monetary costs depending on the number of cores, amount of memory, storage and network speeds. The actual dollar cost of a workload taking a cumulative time $\mathcal{T}_x$ on a cluster consisting of machines of type $x$ having a rental rate of $r_x$ per core, per unit time is given by:
 \begin{equation}
 \label{eqn:totalcost}
 \mathcal{C} = \mathcal{T}_x \times r_x
 \end{equation}
 
 
+Different machine types on a cloud platform can have different monetary costs\eat{ depending on the number of cores, amount of memory, storage and network speeds}. The actual dollar cost of a workload taking a cumulative time $\mathcal{T}_x$ on a cluster consisting of machines of type $x$ having a rental rate of $r_x$ per core, per unit time is given by:
 \subsection{Parameters}
 
 \eat{
