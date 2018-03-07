@@ -22,7 +22,7 @@ Different machine types on a cloud platform can have different monetary costs de
 
 \subsection{Parameters}
 
-
+\eat{
 \begin{table*}
 	\begin{center}
 		\begin{tabular}{ |l|l|l| } 
@@ -46,9 +46,34 @@ Different machine types on a cloud platform can have different monetary costs de
 	\caption{Parameters of the Job to be optimized}
 	\label{table:job_params}	
 \end{table*}
+}
 
 
 From OtterTune\cite{vanaken}, a tool to auto tune Databases like MySQL and PostgreSQL, it was found that tuning only few knobs can improve performance significantly. This finding carries over to SQL-on-Hadoop engines as well. We chose a few critical parameters to optimize by consulting industry experts in the domain. These parameters can be set for each job separately and can thus be tuned for each query in the workload. Table \ref{table:job_params} lists these job parameters for Map-reduce and Spark engine. At the same time, the methodology is applicable even if the set is augmented with more parameters or if a different set of parameters are chosen. 
+
+\begin{table}
+	\begin{center}
+		\begin{tabular}{ |p{1.3cm}|p{3.4cm}|p{2.8cm}| } 
+			\hline
+			Parameter & Hive on MR & Spark \\ 
+			\hline
+			Mapper memory & mapreduce.map. memory.mb & \multirow{2}{*}{spark.executor.memory} \\
+			Reducer memory & mapreduce.reduce.memory.mb & \\
+			\hline
+			\multirow{2}{1}{Mapper parallelism} & \multicolumn{2}{|c|}{mapreduce.input.fileinputformat.split.maxsize} \\
+			& \multicolumn{2}{|c|}{mapreduce.input.fileinputformat.split.minsize} \\
+			\hline
+			Reducer parallelism & hive.exec.reducers. bytes.per.reducer & spark.sql.shuffle.partitions \\
+			\hline
+			Executor cores & Not applicable & spark.executor.cores \\
+			\hline
+			Mapper Buffer & mapreduce.task.io.sort.mb & Not applicable \\
+			\hline
+		\end{tabular}
+	\end{center}
+	\caption{Parameters of the Job to be optimized}
+	\label{table:job_params}	
+\end{table}
 
 \eat{
 The set of parameters can be classified as follows:

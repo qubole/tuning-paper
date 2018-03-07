@@ -14,8 +14,9 @@ The inputs to the algorithms are:
 \end{enumerate}
 }
 
-\begin{table}
-\begin{tabular}{ |l|p {4.5 cm}| } 
+\begin{table}		
+\begin{center}
+\begin{tabular}{ |l|p {5.3 cm}| } 
  \hline
  Parameters & Description \\ 
  \hline
@@ -30,33 +31,37 @@ The inputs to the algorithms are:
  numOfReducer & Number of reduce tasks \\
  bytesPerReducer & Corresponds to Hive parameter \textit{hive.exec.reducers.bytes.per.reducer} \\
  reducerMemory & Container memory for reduce tasks \\
- ioSort & Total amount of buffer memory in mega bytes to be used for sorting. Corresponds to Hadoop parameter \textit{mapreduce.task.io.sort.mb} \\
+ ioSort & Buffer memory in MB to be used for sorting (\textit{mapreduce.task.io.sort.mb}) \\
 % spilledMapRecords & Number of records spilled in Map tasks  \\
  spilledMapBytes & Bytes spilled in Map tasks  \\
  spilledRedBytes & Bytes spilled in Reduce tasks  \\
  \hline
 \end{tabular}
+\end{center}
 \caption{Job metrics and parameters}
 \label{table:job_metrics}
 \end{table}
 
 \begin{table}[h]
-\begin{tabular}{ |l|p {4.5 cm}| }
+\begin{center}
+\begin{tabular}{ |l|p {6 cm}| }
  \hline
  Parameters & Description \\ 
  \hline
  nodeMemory  & Total available memory per node for MR job   \\ 
  cpuPerNode & Number of CPUs per node \\ 
  vCpuPerNode & Number of vCPUs per node  \\
- eCPU & computing units per node similar to Amazon ECU \\
+ eCPU & Computing units per node similar to Amazon ECU \\
  \hline
 \end{tabular}
+\end{center}
 \caption{Instance configuration}
 \label{table:inst_conf}
 \end{table}
 
 \begin{table}[h]
-\begin{tabular}{ |p {1.8 cm}|p {3.5 cm}|p {1 cm} | } 
+	\begin{center}
+\begin{tabular}{ |l|p {4.8 cm}|p {1 cm} | } 
  \hline
  Parameters & Description & Default\\ 
  \hline
@@ -67,6 +72,7 @@ The inputs to the algorithms are:
  minRedTime & Minimum time that a reducer should take & 60s \\ 
  \hline
 \end{tabular}
+\end{center}
 \caption{Global Parameters}
 \label{table:global_params}
 \end{table}
@@ -122,7 +128,7 @@ We evaluated the effectiveness of $OptResource$ method by running experiments on
 Figure \ref{fig:modelbasedresult} shows the benefit predicted by our model and the actual observed benefit for these queries. As noted before the improvements are compared to configuration chosen by experts at the customer. The results show that the algorithm leads to significant savings in the cumulative resource usage cost, ranging from 70\% for $q3$ to 90\% for $q2$. Further, the actual savings closely match the predicted savings indicating that the model is reasonably accurate.
 
 \begin{figure}[h]
-	\includegraphics[width=\linewidth]{chart.png}
+	\centering\includegraphics[height=4cm]{chart.png}
 	%\vspace*{-15pt}
 	\caption{Model Based Result: Predicted reduction in cost versus Actual reduction in cost for HIVE on MR queries}
 	\label{fig:modelbasedresult}
@@ -131,7 +137,7 @@ Figure \ref{fig:modelbasedresult} shows the benefit predicted by our model and t
 We also evaluated effectiveness of the same technique on SparkSQL. Algorithm for it is very similar to $OptResource$ and we are skipping it for brevity. We ran it on 3 real world SparkSQL customer queries (Customer 3). Figure \ref{fig:modelbasedresultspark} shows that the predicted percent reduction in cost matches that of actual reduction is cost observed with very high accuracy.
 
 \begin{figure}[h]
-	\includegraphics[width=\linewidth]{chart_spark.png}
+	\centering\includegraphics[height=4cm]{chart_spark.png}
 	%\vspace*{-15pt}
 	\caption{Model Based Result: Predicted reduction in cost versus Actual reduction in cost for SparkSQL queries}
 	\label{fig:modelbasedresultspark}

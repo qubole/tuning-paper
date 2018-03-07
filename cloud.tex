@@ -6,17 +6,19 @@ We will now consider the usage of model based methods for SQL-on-Hadoop engines 
 Cloud platforms provide additional flexibility due to the elastic nature of the cloud and the choice of different instance types.
 
 \noindent\subsubsection*{Cloud elasticity}
- In the cloud, the physical resource for the cluster are not committed forever. Clusters can be spun up and shut down on demand. In the iterative and model based experiments till now, we have focused on the cumulative resource usage metric (Equation~\ref{eqn:totalresource}), which was mainly achieved by reducing the memory usage of the containers. 
+ In the cloud, the physical resource for the cluster are not committed forever. Clusters can be spun up and shut down on demand. In the \eat{iterative and model based} experiments till now, we have focused on the cumulative resource usage metric (Equation~\ref{eqn:totalresource}), which was mainly achieved by reducing the memory usage of the containers. 
 In practice, this saving in memory would be useful only if it could be gainfully used by some other task or job. However, for all the big data SQL engines, the memory used by all the task processes is the same. It is controlled by parameters at the query level (e.g. mapper memory, reducer memory, spark executor memory) and cannot be tuned per task.
 Further, each workload will use its own dynamic cluster in a cloud setting, which implies that other workloads cannot use the memory saved either. 
 
 Thus saving memory may not be very useful and should not be the main criterion. Let us look at memory allocation in further detail. In SQL-on-Hadoop systems, containers are allocated using Yarn, which allocates based on two dimensions - \textbf{memory} and \textbf{vcpu}. Each container is given 1 vcpu and some memory. If all the vcpus on a node are allocated and memory is still available, the extra memory cannot be used and is wasted. Conversely, if all memory is used up and extra vcpus are available, those extra vcpus are wasted since they cannot be allocated. 
-Figure \ref{fig:container_shape} illustrates the three scenarios:
+Figure \ref{fig:container_shape} illustrates the three scenarios.
+\eat{
 \begin{enumerate}[label=(\alph*)]
 	\item[$\bullet$] Memory/vCPU ratio of container is same as that of instance; hence, neither memory nor CPU is wasted. 
 	\item[$\bullet$] Memory/vCPU ratio of container is smaller than that of instance; hence, memory is wasted as extra memory of instance is still remaining unused after container allocation.
 	\item[$\bullet$] Memory/vCPU ratio of container is higher than that of instance; hence, CPU is wasted as extra CPU of instance is remaining unused after container allocation.
 \end{enumerate}
+}
 \begin{figure*}[h]
 	\includegraphics[width=0.3\linewidth]{container_shape1.png} 
 	\includegraphics[width=0.3\linewidth]{container_shape2.png}
@@ -25,7 +27,6 @@ Figure \ref{fig:container_shape} illustrates the three scenarios:
 	\caption{\textbf{(a)} No Resource is wasted \textbf{(b)} Memory is wasted \textbf{(c)} CPU is wasted}
 	\label{fig:container_shape}
 \end{figure*}
-
 This implies that memory for each container should be set according of the Memory/vCPU ratio of the machine which leads to the following conclusion:
 \begin{insight}
 	\label{insight:memcpu}
@@ -39,6 +40,7 @@ Cloud platforms provide a choice of different instance types, each of which may 
 
 \subsection{Algorithm}
 
+\eat{
 \begin{algorithm}
 	\caption{\textbf{fitJobMR}}\label{jobfit}
 	\begin{algorithmic}[1]
@@ -64,16 +66,24 @@ Cloud platforms provide a choice of different instance types, each of which may 
 		\STATE \RETURN $\mathcal{P}_{new}$, $\mathcal{T}$
 	\end{algorithmic}
 \end{algorithm}
+}
 
-The algorithm consists of two parts -- \textbf{fitJobMR} (Algorithm~\ref{jobfit}) that finds the optimal parameters on a given instance type for MR Job and $optimizeCost$ (Algorithm~\ref{cost_optimize}) that searches across instance types to determine the best instance type to be used. 
+The algorithm consists of two parts -- \textbf{fitJobMR}/\textbf{fitJobSpark} that finds the optimal parameters on a given instance type for MR/Spark Job and $optimizeCost$ (Algorithm~\ref{cost_optimize}) that searches across instance types to determine the best instance type to be used. Due to lack of space, we list only algorithm \textbf{fitJobSpark} (Algorithm~\ref{jobfit}) for SparkSQL jobs. \textbf{fitJobMR} for Hive on MR is similar in nature and is listed in~\cite{fullpaper}.
 
+Algorithm \textbf{fitJobSpark} is analogous to $OptResource$, but also takes the instance type $I$, a set of stage parameters (Table~\ref{table:stage_params}) $\mathcal{S}$ and global parameters (Table~\ref{table:global_params}) as input. It starts by setting  he $executor.cores$ to the number of vCPUs per node according to Insight~\ref{insight:executorcore} (line 1). Instead of choosing the smallest possible $splitSize$ like $OptResource$, it fixes $executor.memory$ based on the memory available in the instance type being considered (lines 2--3). It then computes the $shuffleBuffer$ and $readBuffer$ available to each stage (line 4--5). Then the $splitSize$ and $shufflePartitions$ are computed such that they fit in the available $readBuffer$ and $shuffleBuffer$. Since different stages may be processing different amounts of data, we take a conservative approach and choose the minimum $splitSize$ and the maximum $shufflePartition$ across all stages so that there are no spills (lines 6--12). Finally, the algorithm computes the estimated cumulative time (line 13), taking into account the CPU power (eCPU).
+
+\eat{
 Algorithm \textbf{fitJobMR} is analogous to $OptResource$, but also takes the instance type $I_{new}$ as input. Instead of choosing the smallest possible $splitSize$ like $OptResource$, it starts with fixing $mapperMemory$ and $reducerMemory$ based on the memory available per core in the instance type being considered (lines 2--3). Based on this, the $ioSort$ is computed (lines 4--8). This is followed by computing the $splitSize$, such that the output of that split partition fits in the $ioSort$ and does not cause any spill (lines 9--11). Similarly, the $bytesPerReducer$ is computed such that the amount of mapper output data processed by each reducer fits in the reducer buffer without causing spills (lines 12--13). The algorithm also computes the estimated cumulative time (lines 14--16), by accounting for the amount of data processed and the CPU power (eCPU). Note that this algorithm optimizes a single Map Reduce stage. But typically queries comprises of multiple Map Reduce stages. In which case, we consider only the most dominant stage in terms of cumulative execution time of containers and optimize it. In case, there are no clear dominant stage or multiple dominant stages, we are conservative to avoid spills i.e., smallest suggested split size and bytes per reducer across stages are chosen.
+}
 
-Algorithm $optimizeCost$ searches for the best instance type. It iterates over all the available instance types and calls \textbf{fitJobMR} to find the best configuration and cumulative time for each type (line 2). It computes the dollar cost  of the query using the rental rate per core per unit time $r$ using Equation~\ref{eqn:totalcost} (line 3). The instance type leading to the least dollar cost and the configuration corresponding to that instance are finally output by the algorithm.
+Algorithm $optimizeCost$ searches for the best instance type. It iterates over all the available instance types and calls \textbf{fitJobSpark} to find the best configuration and cumulative time for each type (line 2). It computes the dollar cost  of the query using the rental rate per core per unit time $r$ using Equation~\ref{eqn:totalcost} (line 3). The instance type leading to the least dollar cost and the configuration corresponding to that instance are finally output by the algorithm.
 
+\eat{
 Algorithm \textbf{fitJobSpark} defined in Algorithm \ref{jobfitspark} is similar to \textbf{fitJobMR} but for SparkSQL Jobs instead of Hive on MR jobs. Algorithm \textbf{fitJobSpark} takes a set of stage parameters (defined in Table~\ref{table:stage_params}) $\mathcal{S}$ as input along with instance and global parameter as in \textbf{fitJobMR}.
+}
 
 \begin{table}[h]
+\begin{center}
 \begin{tabular}{ |l|p {4.5 cm}| }
  \hline
  Parameters & Description \\ 
@@ -82,6 +92,7 @@ Algorithm \textbf{fitJobSpark} defined in Algorithm \ref{jobfitspark} is similar
  shuffleRead & Shuffle Bytes Read\\ 
  \hline
 \end{tabular}
+\end{center}
 \caption{Stage Parameter for SparkSQL Job}
 \label{table:stage_params}
 \end{table}
@@ -116,10 +127,10 @@ Algorithm \textbf{fitJobSpark} defined in Algorithm \ref{jobfitspark} is similar
 \caption{optimizeCost} \label{cost_optimize}
 \begin{algorithmic}[1]
 \footnotesize
-\REQUIRE $\mathcal{P}$ is the job parameters (defined in \ref{table:job_params} ), Set $\mathcal{I} = {i_1, i_2, i_3, \ldots i_n} $ set of instance configurations (defined in \ref{table:inst_conf}), rental rates per core per unit time for each type $\mathcal{R}={r_1, r_2, \ldots r_n}$
+\REQUIRE $\mathcal{S}$ is the stage parameters (defined in \ref{table:stage_params} ), Set $\mathcal{I} = {i_1, i_2, i_3, \ldots i_n} $ set of instance configurations (defined in \ref{table:inst_conf}), rental rates per core per unit time for each type $\mathcal{R}={r_1, r_2, \ldots r_n}$
 \ENSURE Returns optimized instance type and job parameters across all the instance configurations in $\mathcal{I}$.
 \FOR {$x$ = 1, 2 \ldots n}
-	\STATE $config, time \gets fitJobForMR(\mathcal{P}, i_x)$
+	\STATE $config, time \gets fitJobSpark(\mathcal{S}, i_x)$
 	\STATE $cost \gets  bestTime \times r_x$  
 	\IF {$cost < bestCost$}
 		\STATE $bestCost \gets cost$;
@@ -144,7 +155,7 @@ queries on c3 family of machines. We re-ran the queries on a 4-node cluster with
 Figure \ref{fig:syntheticcloudmodel} shows the reduction percent on absolute dollar cost of running a subset of the
 TPC DS queries. Dollar cost is determined by the cost of running a particular AWS instance for cumulative time of running query as defined in Section~\ref{sec:optmethod}.
 \begin{figure}[h]
-	\includegraphics[width=\linewidth]{CloudSyn.png}
+	\centering\includegraphics[height=4cm]{CloudSyn.png}
 	%\vspace*{-15pt}
 	\caption{Synthetic workload reduction in absolute dollar cost}
 	\label{fig:syntheticcloudmodel}
@@ -154,7 +165,7 @@ TPC DS queries. Dollar cost is determined by the cost of running a particular AW
 We ran these experiments on a similar cluster on AWS. The 3 customer queries were already tuned by data engineers. Figure \ref{fig:modelbaseddollarresult} shows the reduction percent on absolute dollar for the 3 manually optimized customer queries. 
 
 \begin{figure}[h]
-	\includegraphics[width=\linewidth]{ModelExp.png}
+	\centering\includegraphics[height=3cm]{ModelExp.png}
 	%\vspace*{-15pt}
 	\caption{Real workload reduction in absolute dollar cost}
 	\label{fig:modelbaseddollarresult}

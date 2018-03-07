@@ -10,13 +10,6 @@ critical configuration parameters\cite{DebnathLM08}. All these techniques
 are based on using the optimizer cost model to simulate database behavior. The disadvantage is
 that the cost model may not model the effects of all important parameters.
 
-iTuned\cite{Duan} is one of the first attempts to holistically 
-tune configuration parameters in modern database systems. iTuned consists of a planner
-which plans experiments and an executor that run experiments to choose the best parameters
-and the best values for a specific workload. iTuned is also a good example of a system that
-ran experiments on user workloads and queries compared to using models to simulate data engines.
-Our preferred approach focuses on SQL-on-Hadoop engine and uses models to eliminate cost of experiments.
- 
 The popularity of Apache Hadoop ecosystem (Apache Hive, Apache Spark etc) increased interest
 in choosing configuration parameters automatically. 
 \eat{
@@ -47,25 +40,39 @@ to other SQL engines much more easily. For example, in this paper we provide mod
 fast and the internal architectures change often in every release. The chances of requiring changes is lesser if the model is based on few parameters important for SQL workloads.
 The disadvantage of our approach is that it is not applicable to all types of workloads. 
 
+
 There are multiple approaches \cite{wu2013self} \cite{lama2012aroma} that use machine learning techniques
-to cluster jobs based on their profiles. Based on the profile, the most optimal cluster configuration is
-used. Aroma \cite{lama2012aroma} optimizes resource allocation and cost of jobs. In
+to cluster jobs based on their profiles and choose the most optimal cluster configuration. Aroma \cite{lama2012aroma} optimizes resource allocation and cost of jobs. \eat{In
 the offline phase, using a training set, the jobs are clustered
 (using variants of k-means) according to their respective signatures.
 In the online phase, Aroma trains a SVM which makes
 accurate and fast prediction of a job's performance for various
-configuration parameters and input data sizes. The optimization function in Aroma considers
+configuration parameters and input data sizes.} The optimization function in Aroma considers
 the machine type, number of machines and unit cost of the machine types with a constraint on
 run time of the query. Our approach uses a rule based mathematical model instead of statistical or machine learning approaches. 
- 
+
+An alternative school of thought is the iterative method, in which experiments
+with alternate values of configuration parameters are executed instead of being simulated in a statistical or mathematical model. They don't need to rely on accurate models for complex data engines which are hard to build. The obvious disadvantage is that experiments cost money and the main 
+goal of these approaches is to make every experiment count.
+iTuned\cite{Duan} is one of the first attempts in this direction to holistically 
+tune configuration parameters in modern database systems. It consists of a planner
+which plans experiments and an executor that run experiments to choose the best parameters
+and the best values for a specific workload. \eat{iTuned is also a good example of a system that
+	ran experiments on user workloads and queries compared to using models to simulate data engines.}
+CherryPick\cite{LiMinZeng} and Sandeep Kumar et al.\cite{KumarPLPGB16} apply this approach to Hadoop based systems.  SPSA is used in \cite{KumarPLPGB16}, whereas Bayesian Optimization is used in \cite{LiMinZeng} 
+to choose an optimal set of experiments to find the best values for a pre-determined set of configuration parameters.
+We initially tried an iterative execution approach and found it to be impractical in terms of dollar cost\cite{fullpaper}. At the same time it is hard to manage detailed models of complex engine. Thus, 
+our preferred approach focuses on SQL-on-Hadoop engines and uses models to eliminate cost of experiments.
+
+
+ \eat{
 CherryPick\cite{LiMinZeng} and Sandeep Kumar et al.\cite{KumarPLPGB16} represent an alternate school of thought.
 Mathematical or statistical models for complex data engines is hard to build. Moreover maintenance of these models 
 is also hard as these data engines evolve. In this approach, experiments
 with alternate values of configuration parameters are executed instead of simulated in a 
 statistical or mathematical model. The obvious disadvantage is that experiments cost money and the main 
-goal of these approaches is to make every experiment count. In \cite{KumarPLPGB16}, the authors use SPSA and Bayesian Optimization in \cite{LiMinZeng} 
-to choose an optimal set of experiments to find the best values for a pre-determined set of configuration parameters.
+goal of these approaches is to make every experiment count.
 In Section~\ref{section:iter} we tried an iterative execution approach and found it to be impractical in terms of dollar cost. 
 At the same time it is hard to manage detailed models of complex engine and therefore
 we propose a simple model focused on important SQL operations.
-  
+}  
