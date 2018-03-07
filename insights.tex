@@ -5,7 +5,24 @@ In the previous section, we saw that the iterative approach is not scalable as i
 \eat{
 The assumptions made in the iterative approach (Section~\ref{sec:assumptions}) continue to be applicable.} \eat{The experiments focus on a few key parameters, the values are discretized, range of values for each parameter is bounded and the dimensions are independent of each other. }
 
-
+\begin{figure*}[ht]
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{fig/varysplitsize.png}
+  \caption{Varying split size \protect\footnotemark[1]}\label{fig:varysplitsize}
+\endminipage\hfill
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{fig/varyreducers.png}
+  \caption{Varying reducer partitions \protect\footnotemark[1]}\label{fig:varyreducers}
+\endminipage\hfill
+\minipage{0.32\textwidth}%
+  \includegraphics[width=\linewidth]{fig/varymem.png}
+  \caption{Varying memory per executor core \protect\footnotemark[1]}\label{fig:varymem}
+\endminipage
+\eat{\minipage{0.24\textwidth}%
+	\includegraphics[width=\linewidth]{fig/varycore.png}
+	\caption{Varying cores per executor \protect\footnotemark[1]}\label{fig:varycore}
+\endminipage}
+\end{figure*}
 
 \subsubsection*{Memory and partition size}
 We studied the relationship between the container memory and the amount of data processed by the container, i.e. the partition size.  Spark tasks are of two types -- input mapper tasks the process data from the input tables and reducer tasks that process the output from the previous tasks in the pipeline. The splitsize parameters ($split.minsize$ and $split.maxsize$) determine the partitions size for the mapper tasks, whereas the reducer parallelism parameter ($spark.sql.shuffle.partitions$) determines the data processed by each reducer task.
@@ -20,12 +37,14 @@ Initially, we varied the partition size of the mapper tasks by varying the split
 \eat{
 In the first set of experiments, we varied the partition size of the mapper tasks by varying the split parameter while holding all other parameters constant. The splitsize was varied from 150 MB to 600 MB. Based on the container memory, the memory available to each executor core was 1386 MB, which was sufficient to hold even the largest split of 600 MB. Hence, there were no spills in any of the experiments. Figure \ref{fig:varysplitsize} shows the variation of the cumulative run time with the splitsize. Overall, the cumulative run time reduces as the splitsize increases. This is because the number of mapper tasks reduces as the splitsize increases. This leads to overall lesser cpu overheads in terms of the number of tasks to be managed. For MR engines, the overhead of starting a JVM for each task can further add to the overhead. Also, reducer tasks down the pipeline have to pull their data from lesser number of mappers, leading to lesser network overheads. Since there are no spills, there is no major negative effect of larger split sizes. It can be further observed that, though the cumulative time reduces, the overall reduction is not large, with the average being 6.73\%. This is because the total amount of data processed, IO and network traffic is independent of the parallelism, only the overheads vary. 
 }
+\eat{
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{fig/varysplitsize.png}
 	%\vspace*{-15pt}
 	\caption{Varying split size \protect\footnotemark[1]}
 	\label{fig:varysplitsize}
 \end{figure}
+}
 
 \footnotetext[1]{Bars in chart are in the same order as that of legends}
 Next, we varied the partition sizes for the reducer tasks by varying the %$spark.sql. 
@@ -41,13 +60,14 @@ $shuffle.partitions$ parameter from 50 to 800. This varies the number of reducer
 \end{insight}
 \eat{The increased overheads are due to managing a larger number of tasks and increase in the number of communicating channels. For MR engine, the overhead of starting a JVM for each task can further add to the overhead.}
 
+\eat{
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{fig/varyreducers.png}
 	%\vspace*{-15pt}
 	\caption{Varying reducer partitions \protect\footnotemark[1]}
 	\label{fig:varyreducers}
 \end{figure}
-
+}
 
 The experiments with reducer parallelism also show the effect of spills on the query time. For example, $q27$, $q34$ and $q46$ cumulative time decreased when parallelism increased from 100 to 200 partitions. Figure~\ref{fig:q46} shows a graph for $q46$, in which the time reduces by almost 30\% when the number of shuffle partitions increases from 100 to 200. This is due to the fact that at 100 partitions, the amount of data processed by the reducer task does not fit in memory and causes a spill. As the number of partitions increases to 200, each partition becomes smaller and fits in memory, thus avoiding a spill. This leads to the following insight:
 \begin{insight}
@@ -68,12 +88,14 @@ Spills can be avoided by providing adequate memory to each task or by making mor
 %We saw that the memory of each container should be set according the Memory/vCPU ratio of the machine. 
 \eat{Cloud platforms provide a variety of machines which differ in various characteristics such as cpu speed, disk speed, network speed, cpu cores and memory.} Usually, machines with higher memory/cpu core are more expensive for the same CPU type. To evaluate if it worth paying extra for higher memory/cpu core, we \eat{conducted a set of experiments where we} varied the memory available per executor core from 746 MB to 1386 MB in steps of 200 MB, while keeping all other parameters fixed. \eat{The experiments were run on a Spark engine on the TPC DS dataset (scale 1000) and using the TPC DS workload. The average data read by each query was around 20 to 40 GB.} \eat{The experiments were run on a 4 node cluster on AWS with machine type r3.xlarge. We varied the memory per executor core from 746 MB to 1386 MB in steps of 200 MB.} The partition sizes were at the default value of 128 MB, so there is enough memory in all cases to hold the data and there were no spills. Figure~\ref{fig:varymem} shows \eat{the variation in the cumulative time with memory. In most cases, it was observed that} the cumulative cpu time usually decreases as the container memory increases. The decrease is due to lesser pressure on memory and reduced costs of garbage collection. \eat{However, in some cases the time also increases with memory.} However, the variation in cumulative cpu cost with memory was not very significant. Overall the average speedup was 3.5\% and the maximum speed up was 18\% ($q3$). 
 
+\eat{
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{fig/varymem.png}
 	%\vspace*{-15pt}
 	\caption{Varying memory per executor core \protect\footnotemark[1]}
 	\label{fig:varymem}
 \end{figure}
+}
 
 \eat{This behavior is due to the way memory is used by the SQL engines.} In SQL engines, memory is mainly used to hold the partition processed by the container (as io.sort.mb in MR and to hold the rdd in Spark). Once there is enough memory to hold the partition in memory (thus avoiding spills), any increase beyond that does not have any additional benefit.
 As long as tasks do not spill, the total work done in terms of IO, CPU and network traffic is independent of the available memory and the parallelism factor of the tasks. This leads to the following insight:
